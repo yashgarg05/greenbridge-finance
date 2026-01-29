@@ -1,6 +1,7 @@
-import { Home, Calculator, ShoppingCart, FileText, Moon, Sun, Sprout, ShieldCheck, Trees, BookOpen } from 'lucide-react';
+import { Home, Calculator, ShoppingCart, FileText, Moon, Sun, Sprout, ShieldCheck, Trees, BookOpen, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 
 interface AppSidebarProps {
   activeTab: string;
@@ -12,8 +13,8 @@ const navItems = [
   { id: 'invest', icon: Sprout, label: 'Invest' },
   { id: 'compliance', icon: ShieldCheck, label: 'Compliance' },
   { id: 'calculator', icon: Calculator, label: 'Calculator' },
-  { id: 'methodology', icon: BookOpen, label: 'Methodology' },
   { id: 'documents', icon: FileText, label: 'Docs' },
+  { id: 'settings', icon: Settings, label: 'Settings' },
 ];
 
 export function AppSidebar({ activeTab, onTabChange }: AppSidebarProps) {
@@ -42,9 +43,12 @@ export function AppSidebar({ activeTab, onTabChange }: AppSidebarProps) {
   return (
     <aside className="w-16 border-r border-border bg-card flex flex-col items-center py-4 shrink-0">
       {/* Logo */}
-      <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center mb-8">
-        <Trees className="h-6 w-6 text-primary-foreground" />
-      </div>
+      <Link to="/" className="w-10 h-10 flex items-center justify-center mb-8">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-8 w-8">
+          <path d="M12 22V13" stroke="#8B4513" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M12 13C16.4183 13 20 9.41828 20 5C20 3.89543 19.1046 3 18 3C16.8954 3 16 3.89543 16 5C16 6.10457 15.1046 7 14 7C12.8954 7 12 6.10457 12 5C12 3.89543 11.1046 3 10 3C8.89543 3 8 3.89543 8 5C8 6.10457 7.10457 7 6 7C4.89543 7 4 6.10457 4 5C4 9.41828 7.58172 13 12 13Z" fill="#22C55E" stroke="#166534" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </Link>
 
       {/* Navigation */}
       <nav className="flex flex-col items-center gap-1 flex-1">

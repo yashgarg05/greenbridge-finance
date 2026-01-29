@@ -27,7 +27,7 @@ export const Hero = () => {
 
                 <ScrollReveal delay={300}>
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
-                        <Link to="/dashboard">
+                        <Link to="/signup">
                             <Button size="lg" className="h-12 px-8 text-base bg-primary text-primary-foreground hover:bg-primary/90">
                                 Start Free Calculation <ArrowRight className="ml-2 h-4 w-4" />
                             </Button>

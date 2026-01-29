@@ -1,10 +1,12 @@
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Github, Apple } from "lucide-react";
 
 const Signup = () => {
+    const navigate = useNavigate();
+
     return (
         <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 relative overflow-hidden">
             {/* Background Pattern */}
@@ -46,7 +48,7 @@ const Signup = () => {
                                 <Input id="confirmPassword" type="password" className="bg-background/50" />
                             </div>
                         </div>
-                        <Button className="w-full">Create account</Button>
+                        <Button className="w-full" onClick={() => navigate('/dashboard')}>Create account</Button>
                     </div>
 
                     <div className="relative">

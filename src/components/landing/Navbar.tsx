@@ -18,7 +18,7 @@ export const Navbar = () => {
                     <Link to="/login" className="text-sm font-medium hover:text-primary transition-colors">
                         Login
                     </Link>
-                    <Link to="/dashboard">
+                    <Link to="/signup">
                         <Button size="sm" className="font-medium">
                             Start Compliance
                         </Button>

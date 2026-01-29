@@ -9,6 +9,8 @@ import { FormulaBreakdown } from '@/components/dashboard/FormulaBreakdown';
 import { GreenInvestment } from '@/components/dashboard/GreenInvestment';
 import { ComplianceControlPanel } from '@/components/dashboard/ComplianceControlPanel';
 import { VerifiedCreditsInfo } from '@/components/dashboard/VerifiedCreditsInfo';
+import { FeatureShortcuts } from '@/components/dashboard/FeatureShortcuts';
+import { SettingsPanel } from '@/components/dashboard/SettingsPanel';
 
 const Dashboard = () => {
     const [activeTab, setActiveTab] = useState('overview');
@@ -56,6 +58,8 @@ const Dashboard = () => {
                 return <CBAMCalculator />;
             case 'documents':
                 return <DocumentVault />;
+            case 'settings':
+                return <SettingsPanel />;
             default:
                 return (
                     <div className="space-y-6">
@@ -68,8 +72,9 @@ const Dashboard = () => {
                         {/* Main Layout */}
                         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                             {/* Card 1: Verified Credits Info */}
-                            <div className="lg:col-span-2 h-full">
+                            <div className="lg:col-span-2 h-full flex flex-col gap-6">
                                 <VerifiedCreditsInfo />
+                                <FeatureShortcuts onTabChange={handleTabChange} />
                             </div>
 
                             {/* Card 2: Project Info */}
