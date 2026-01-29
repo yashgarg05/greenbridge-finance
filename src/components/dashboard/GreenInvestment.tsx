@@ -348,6 +348,7 @@ export const GreenInvestment = () => {
     };
 
 
+
     // --- New Features State ---
     const [comparisonList, setComparisonList] = useState<string[]>([]);
     const [isComparisonOpen, setIsComparisonOpen] = useState(false);

@@ -39,11 +39,11 @@ const MyListings = () => {
 
     return (
         <div className="flex bg-background min-h-screen">
-             <AppSidebar activeTab="listings" onTabChange={(tab) => {
-                if (tab === 'overview') navigate('/dashboard');
-                // Handle other tabs if needed
-             }} />
-            
+            <AppSidebar activeTab="listings" onTabChange={(tab) => {
+                if (tab === 'listings') return; // Already here
+                navigate('/dashboard', { state: { activeTab: tab } });
+            }} />
+
             <main className="flex-1 p-8 overflow-y-auto">
                 <div className="max-w-5xl mx-auto space-y-8">
                     <div className="flex items-center justify-between">

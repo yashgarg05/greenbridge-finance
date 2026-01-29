@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Bot, Sparkles, PhoneOff, Mic, Volume2 } from 'lucide-react';
 import { AppSidebar } from '@/components/AppSidebar';
 import { CBAMCalculator } from '@/components/CBAMCalculator';
@@ -14,8 +14,16 @@ import { SettingsPanel } from '@/components/dashboard/SettingsPanel';
 import { ChatSupport } from '@/components/dashboard/ChatSupport';
 
 const Dashboard = () => {
-    const [activeTab, setActiveTab] = useState('overview');
+    const location = useLocation();
+    const [activeTab, setActiveTab] = useState(location.state?.activeTab || 'overview');
     const navigate = useNavigate();
+
+    // Update active tab if location state changes (e.g. browsing back)
+    useEffect(() => {
+        if (location.state?.activeTab) {
+            setActiveTab(location.state.activeTab);
+        }
+    }, [location.state]);
 
     const handleTabChange = (tab: string) => {
         if (tab === 'methodology') {

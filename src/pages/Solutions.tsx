@@ -25,10 +25,44 @@ const Solutions = () => {
                         </p>
                     </div>
 
-                    {/* Solutions Grid */}
+                    {/* The Problem (Configuration) */}
+                    <div className="grid md:grid-cols-2 gap-12 items-center bg-muted/30 p-8 rounded-3xl border border-border/50">
+                        <div className="space-y-4">
+                            <div className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors border-red-200 bg-red-50 text-red-700 w-fit">
+                                The Problem
+                            </div>
+                            <h2 className="text-3xl font-bold">Rising Emissions, Finite Carbon Budget</h2>
+                            <p className="text-muted-foreground">
+                                The world faces a critical implementation gap. To limit warming to 1.5°C, global emissions must peak immediately and halving by 2030. Current trajectories show a continued rise.
+                            </p>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="bg-background p-4 rounded-xl border shadow-sm text-center">
+                                <div className="text-3xl font-bold text-red-600 mb-1">50Gt</div>
+                                <div className="text-xs text-muted-foreground">Annual CO₂e Emissions</div>
+                            </div>
+                            <div className="bg-background p-4 rounded-xl border shadow-sm text-center">
+                                <div className="text-3xl font-bold text-orange-600 mb-1">1.1°C</div>
+                                <div className="text-xs text-muted-foreground">Current Warming</div>
+                            </div>
+                            <div className="bg-background p-4 rounded-xl border shadow-sm text-center">
+                                <div className="text-3xl font-bold text-yellow-600 mb-1">7 Yrs</div>
+                                <div className="text-xs text-muted-foreground">Carbon Budget Left</div>
+                            </div>
+                            <div className="bg-background p-4 rounded-xl border shadow-sm text-center">
+                                <div className="text-3xl font-bold text-blue-600 mb-1">$4T</div>
+                                <div className="text-xs text-muted-foreground">Investment Gap</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Solutions Grid (Optimized) */}
                     <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-8">
                         {/* Energy Efficiency */}
-                        <div className="p-8 rounded-2xl bg-card border border-border/50 hover:shadow-lg transition-all duration-300">
+                        <div className="p-8 rounded-2xl bg-card border border-border/50 hover:shadow-lg transition-all duration-300 relative overflow-hidden group">
+                            <div className="absolute top-4 right-4 bg-green-100 text-green-700 text-[10px] font-bold px-2 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                                Cost Optimization: High
+                            </div>
                             <div className="h-12 w-12 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center mb-6">
                                 <Zap className="h-6 w-6 text-orange-600 dark:text-orange-400" />
                             </div>
@@ -50,7 +84,10 @@ const Solutions = () => {
                         </div>
 
                         {/* Renewable Energy */}
-                        <div className="p-8 rounded-2xl bg-card border border-border/50 hover:shadow-lg transition-all duration-300">
+                        <div className="p-8 rounded-2xl bg-card border border-border/50 hover:shadow-lg transition-all duration-300 relative overflow-hidden group">
+                            <div className="absolute top-4 right-4 bg-blue-100 text-blue-700 text-[10px] font-bold px-2 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                                Impact Scale: Giga-ton
+                            </div>
                             <div className="h-12 w-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mb-6">
                                 <Wind className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                             </div>
@@ -72,7 +109,10 @@ const Solutions = () => {
                         </div>
 
                         {/* Sustainable Transport */}
-                        <div className="p-8 rounded-2xl bg-card border border-border/50 hover:shadow-lg transition-all duration-300">
+                        <div className="p-8 rounded-2xl bg-card border border-border/50 hover:shadow-lg transition-all duration-300 relative overflow-hidden group">
+                            <div className="absolute top-4 right-4 bg-green-100 text-green-700 text-[10px] font-bold px-2 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                                Logistics Optimization
+                            </div>
                             <div className="h-12 w-12 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mb-6">
                                 <Leaf className="h-6 w-6 text-green-600 dark:text-green-400" />
                             </div>
@@ -94,7 +134,10 @@ const Solutions = () => {
                         </div>
 
                         {/* Circular Economy */}
-                        <div className="p-8 rounded-2xl bg-card border border-border/50 hover:shadow-lg transition-all duration-300">
+                        <div className="p-8 rounded-2xl bg-card border border-border/50 hover:shadow-lg transition-all duration-300 relative overflow-hidden group">
+                            <div className="absolute top-4 right-4 bg-purple-100 text-purple-700 text-[10px] font-bold px-2 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                                Resource Efficiency
+                            </div>
                             <div className="h-12 w-12 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center mb-6">
                                 <Recycle className="h-6 w-6 text-purple-600 dark:text-purple-400" />
                             </div>
