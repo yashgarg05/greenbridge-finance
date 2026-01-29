@@ -64,6 +64,7 @@ interface Project {
     fundingPercentage: number;
     verifiedBy: string;
     qualityRating: QualityRating;
+    article6: boolean;
     sdgGoals: number[];
     url: string;
 }
@@ -82,6 +83,7 @@ const projects: Project[] = [
         fundingPercentage: 78,
         verifiedBy: 'Gold Standard',
         qualityRating: 'A',
+        article6: true,
         sdgGoals: [7, 13],
         url: 'https://en.wikipedia.org/wiki/Ouarzazate_Solar_Power_Station'
     },
@@ -97,6 +99,7 @@ const projects: Project[] = [
         fundingPercentage: 45,
         verifiedBy: 'Verra',
         qualityRating: 'AA',
+        article6: false,
         sdgGoals: [13, 15],
         url: 'https://onetreeplanted.org/collections/latin-america/products/amazon-rainforest'
     },
@@ -112,6 +115,7 @@ const projects: Project[] = [
         fundingPercentage: 92,
         verifiedBy: 'Gold Standard',
         qualityRating: 'A',
+        article6: true,
         sdgGoals: [7, 9, 13],
         url: 'https://northseawindpowerhub.eu/'
     },
@@ -127,6 +131,7 @@ const projects: Project[] = [
         fundingPercentage: 60,
         verifiedBy: 'UN CDM',
         qualityRating: 'A',
+        article6: false,
         sdgGoals: [6, 13],
         url: 'https://www.charitywater.org/our-work/where-we-work/kenya'
     },
@@ -142,6 +147,7 @@ const projects: Project[] = [
         fundingPercentage: 30,
         verifiedBy: 'Puro.earth',
         qualityRating: 'AAA',
+        article6: true,
         sdgGoals: [9, 13],
         url: 'https://climeworks.com/'
     }
@@ -582,11 +588,16 @@ export const GreenInvestment = () => {
                                     alt={project.title}
                                     className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
                                 />
-                                <div className="absolute top-2 right-2 flex gap-1">
+                                <div className="absolute top-2 right-2 flex flex-col gap-1 items-end">
                                     <Badge variant="secondary" className="backdrop-blur-md bg-black/40 text-white border-0 text-[10px] h-5">
                                         <CheckCircle2 className="w-3 h-3 mr-1 text-green-400" />
                                         {project.verifiedBy}
                                     </Badge>
+                                    {project.article6 && (
+                                        <Badge variant="secondary" className="backdrop-blur-md bg-indigo-600/90 text-white border-0 text-[10px] h-5 shadow-lg">
+                                            Article 6 Compliant
+                                        </Badge>
+                                    )}
                                 </div>
                                 <div className="absolute bottom-2 left-2">
                                     <Badge variant="secondary" className="backdrop-blur-md bg-white/90 text-black border-0 text-[10px] shadow-sm">
