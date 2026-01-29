@@ -11,6 +11,7 @@ export interface Order {
     timestamp: number;
     userId: string;
     status: 'OPEN' | 'PARTIAL' | 'FILLED' | 'CANCELLED';
+    type: OrderType;
 }
 
 export interface Trade {

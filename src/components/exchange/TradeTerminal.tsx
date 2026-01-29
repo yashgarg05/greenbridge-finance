@@ -4,7 +4,7 @@ import { RecentTrades } from './RecentTrades';
 
 export const TradeTerminal = () => {
     return (
-        <div className="flex flex-col h-[calc(100vh-4rem)] gap-4 p-4">
+        <div className="flex flex-col h-[calc(100vh-4rem)] gap-4 p-4 overflow-y-auto">
             {/* Header/Stats Bar could go here */}
 
             <div className="flex-1 grid grid-cols-12 gap-4 min-h-0">
@@ -25,7 +25,7 @@ export const TradeTerminal = () => {
                         </svg>
                     </div>
                     {/* Order Entry */}
-                    <div className="h-1/3">
+                    <div>
                         <OrderEntryForm />
                     </div>
                 </div>

@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { exchangeEngine } from '@/lib/ccx/OrderBookEngine';
 import { useToast } from "@/hooks/use-toast";
-import { Slider } from "@/components/ui/slider";
+
 
 export const OrderEntryForm = () => {
     const [side, setSide] = useState<'buy' | 'sell'>('buy');
@@ -38,7 +38,7 @@ export const OrderEntryForm = () => {
     };
 
     return (
-        <Card className="h-full">
+        <Card>
             <CardHeader className="py-3 px-4 border-b">
                 <CardTitle className="text-sm font-medium">Place Order</CardTitle>
             </CardHeader>
@@ -74,13 +74,7 @@ export const OrderEntryForm = () => {
                         />
                     </div>
 
-                    <div className="space-y-2">
-                        <div className="flex justify-between text-xs text-muted-foreground">
-                            <span>Total</span>
-                            <span>Available: €50,000</span>
-                        </div>
-                        <Slider defaultValue={[25]} max={100} step={1} className={side === 'buy' ? "bg-green-100" : "bg-red-100"} />
-                    </div>
+
 
                     <Button
                         className={`w-full ${side === 'buy' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'}`}
