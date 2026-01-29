@@ -16,10 +16,7 @@ export const ProjectInfo = () => {
                 </CardHeader>
                 <CardContent className="text-sm text-muted-foreground space-y-4">
                     <p>
-                        GreenBridge Finance is a comprehensive platform designed to help EU importers and global manufacturers navigate the Carbon Border Adjustment Mechanism (CBAM).
-                    </p>
-                    <p>
-                        We bridge the gap between industrial operations and financial compliance, transforming complex regulatory requirements into clear, actionable financial insights.
+                        GreenBridge Finance helps EU importers and global manufacturers easily manage CBAM carbon regulations by turning complex compliance rules into simple, clear financial insights.
                     </p>
                 </CardContent>
             </Card>
