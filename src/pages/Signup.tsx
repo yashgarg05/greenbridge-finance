@@ -4,20 +4,55 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Github, Apple } from "lucide-react";
 import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 
 const Signup = () => {
     const navigate = useNavigate();
+    const { signUp } = useAuth();
+    const { toast } = useToast();
     const [formData, setFormData] = useState({
         name: "",
         email: "",
-        mobile: ""
+        mobile: "",
+        password: "",
+        confirmPassword: ""
     });
+    const [loading, setLoading] = useState(false);
 
-    const handleSignup = () => {
-        localStorage.setItem('user_name', formData.name || 'Yash Garg');
-        localStorage.setItem('user_email', formData.email || 'yash@greenbridge.finance');
-        if (formData.mobile) localStorage.setItem('user_mobile', formData.mobile);
-        navigate('/dashboard');
+    const handleSignup = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        if (formData.password !== formData.confirmPassword) {
+            toast({
+                title: "Passwords don't match",
+                description: "Please make sure your passwords match",
+                variant: "destructive"
+            });
+            return;
+        }
+
+        if (formData.password.length < 6) {
+            toast({
+                title: "Password too short",
+                description: "Password must be at least 6 characters",
+                variant: "destructive"
+            });
+            return;
+        }
+
+        setLoading(true);
+        const { error } = await signUp(
+            formData.email,
+            formData.password,
+            formData.name,
+            formData.mobile
+        );
+        setLoading(false);
+
+        if (!error) {
+            navigate('/dashboard');
+        }
     };
 
     return (
@@ -38,7 +73,7 @@ const Signup = () => {
                 </div>
 
                 <div className="bg-card border border-border/50 rounded-2xl shadow-sm p-8 space-y-6">
-                    <div className="space-y-4">
+                    <form onSubmit={handleSignup} className="space-y-4">
                         <div className="space-y-2">
                             <Label htmlFor="name">Full Name</Label>
                             <Input
@@ -47,6 +82,7 @@ const Signup = () => {
                                 className="bg-background/50"
                                 value={formData.name}
                                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                required
                             />
                         </div>
                         <div className="space-y-2">
@@ -58,6 +94,7 @@ const Signup = () => {
                                 className="bg-background/50"
                                 value={formData.email}
                                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                required
                             />
                         </div>
                         <div className="space-y-2">
@@ -74,15 +111,33 @@ const Signup = () => {
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <Label htmlFor="password">Password</Label>
-                                <Input id="password" type="password" className="bg-background/50" />
+                                <Input
+                                    id="password"
+                                    type="password"
+                                    className="bg-background/50"
+                                    value={formData.password}
+                                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                    required
+                                    minLength={6}
+                                />
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="confirmPassword">Confirm</Label>
-                                <Input id="confirmPassword" type="password" className="bg-background/50" />
+                                <Input
+                                    id="confirmPassword"
+                                    type="password"
+                                    className="bg-background/50"
+                                    value={formData.confirmPassword}
+                                    onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                                    required
+                                    minLength={6}
+                                />
                             </div>
                         </div>
-                        <Button className="w-full" onClick={handleSignup}>Create account</Button>
-                    </div>
+                        <Button className="w-full" type="submit" disabled={loading}>
+                            {loading ? 'Creating account...' : 'Create account'}
+                        </Button>
+                    </form>
 
                     <div className="relative">
                         <div className="absolute inset-0 flex items-center">

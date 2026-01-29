@@ -48,108 +48,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Bot, Bell } from "lucide-react";
 
 
-// --- Types ---
-type ProjectType = 'Solar' | 'Forestry' | 'Wind' | 'Water' | 'Direct Air Capture';
-type QualityRating = 'AAA' | 'AA' | 'A' | 'B+';
-
-interface Project {
-    id: string;
-    title: string;
-    description: string;
-    location: string;
-    pricePerUnit: number;
-    creditsPerUnit: number;
-    image: string;
-    category: ProjectType;
-    fundingPercentage: number;
-    verifiedBy: string;
-    qualityRating: QualityRating;
-    sdgGoals: number[];
-    url: string;
-}
-
-// --- Data ---
-const projects: Project[] = [
-    {
-        id: '1',
-        title: 'Sahara Solar Initiative',
-        description: 'Large-scale solar farm expansion in Northern Africa, replacing diesel generators with clean renewable energy.',
-        location: 'Morocco',
-        pricePerUnit: 25.00,
-        creditsPerUnit: 1,
-        image: '/images/marketplace/solar.png',
-        category: 'Solar',
-        fundingPercentage: 78,
-        verifiedBy: 'Gold Standard',
-        qualityRating: 'A',
-        sdgGoals: [7, 13],
-        url: 'https://en.wikipedia.org/wiki/Ouarzazate_Solar_Power_Station'
-    },
-    {
-        id: '2',
-        title: 'Amazon Reforestation Project',
-        description: 'Restoring degraded land in the Amazon basin with native species to sequester carbon and restore biodiversity.',
-        location: 'Brazil',
-        pricePerUnit: 15.00,
-        creditsPerUnit: 1.2,
-        image: '/images/marketplace/reforestation.png',
-        category: 'Forestry',
-        fundingPercentage: 45,
-        verifiedBy: 'Verra',
-        qualityRating: 'AA',
-        sdgGoals: [13, 15],
-        url: 'https://onetreeplanted.org/collections/latin-america/products/amazon-rainforest'
-    },
-    {
-        id: '3',
-        title: 'North Sea Wind Expansion',
-        description: 'Offshore wind farm development providing clean grid energy to Northern Europe.',
-        location: 'Netherlands',
-        pricePerUnit: 40.00,
-        creditsPerUnit: 2,
-        image: '/images/marketplace/wind.png',
-        category: 'Wind',
-        fundingPercentage: 92,
-        verifiedBy: 'Gold Standard',
-        qualityRating: 'A',
-        sdgGoals: [7, 9, 13],
-        url: 'https://northseawindpowerhub.eu/'
-    },
-    {
-        id: '4',
-        title: 'Clean Water Access Program',
-        description: 'Solar-powered water filtration systems reducing the need for wood-burning boiling in rural communities.',
-        location: 'Kenya',
-        pricePerUnit: 12.00,
-        creditsPerUnit: 0.8,
-        image: '/images/marketplace/water.png',
-        category: 'Water',
-        fundingPercentage: 60,
-        verifiedBy: 'UN CDM',
-        qualityRating: 'A',
-        sdgGoals: [6, 13],
-        url: 'https://www.charitywater.org/our-work/where-we-work/kenya'
-    },
-    {
-        id: '5',
-        title: 'AtmosClear Direct Air Capture',
-        description: 'Cutting-edge DAC facility permanently removing CO2 from the atmosphere and mineralizing it underground.',
-        location: 'Iceland',
-        pricePerUnit: 150.00,
-        creditsPerUnit: 1,
-        image: '/images/marketplace/dac.png',
-        category: 'Direct Air Capture',
-        fundingPercentage: 30,
-        verifiedBy: 'Puro.earth',
-        qualityRating: 'AAA',
-        sdgGoals: [9, 13],
-        url: 'https://climeworks.com/'
-    }
-];
+import { useProjects, Project } from "@/hooks/useProjects";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // --- Components ---
 
-const CategoryIcon = ({ category }: { category: ProjectType }) => {
+const CategoryIcon = ({ category }: { category: string }) => {
     switch (category) {
         case 'Solar': return <Sun className="w-4 h-4 text-orange-500" />;
         case 'Forestry': return <Sprout className="w-4 h-4 text-green-500" />;
@@ -160,8 +64,8 @@ const CategoryIcon = ({ category }: { category: ProjectType }) => {
     }
 };
 
-const QualityBadge = ({ rating }: { rating: QualityRating }) => {
-    const colors = {
+const QualityBadge = ({ rating }: { rating: string }) => {
+    const colors: Record<string, string> = {
         'AAA': 'bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-800',
         'AA': 'bg-indigo-100 text-indigo-700 border-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-300 dark:border-indigo-800',
         'A': 'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800',
@@ -169,13 +73,15 @@ const QualityBadge = ({ rating }: { rating: QualityRating }) => {
     };
 
     return (
-        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${colors[rating]}`}>
+        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${colors[rating] || colors['A']}`}>
             {rating}
         </span>
     );
 };
 
 export const GreenInvestment = () => {
+    const { projects, loading, addProject } = useProjects();
+
     // Filters
     const [priceRange, setPriceRange] = useState<[number, number]>([0, 200]);
     const [selectedType, setSelectedType] = useState<string>('all');
@@ -200,7 +106,7 @@ export const GreenInvestment = () => {
         contactEmail: ''
     });
 
-    const handleListingSubmit = () => {
+    const handleListingSubmit = async () => {
         // Validation (Basic)
         if (!listingForm.title || !listingForm.contactEmail) {
             toast({
@@ -211,24 +117,32 @@ export const GreenInvestment = () => {
             return;
         }
 
-        // Simulate API call
-        setTimeout(() => {
-            toast({
-                title: "Request Submitted Successfully",
-                description: "Our team will verify your project details and contact you shortly.",
-            });
-            setIsListingOpen(false);
-            setListingForm({
-                title: '',
-                description: '',
-                location: '',
-                category: '',
-                price: '',
-                credits: '',
-                contactName: '',
-                contactEmail: ''
-            });
-        }, 1000);
+        // Add to Supabase
+        await addProject({
+            title: listingForm.title,
+            description: listingForm.description,
+            location: listingForm.location,
+            category: listingForm.category as any,
+            price_per_unit: parseFloat(listingForm.price) || 0,
+            credits_per_unit: parseFloat(listingForm.credits) || 0,
+            image_url: '/images/marketplace/solar.png', // Default image for now
+            funding_percentage: 0,
+            verified_by: 'Pending',
+            quality_rating: 'A',
+            sdg_goals: [13]
+        });
+
+        setIsListingOpen(false);
+        setListingForm({
+            title: '',
+            description: '',
+            location: '',
+            category: '',
+            price: '',
+            credits: '',
+            contactName: '',
+            contactEmail: ''
+        });
     };
 
     // --- New Features State ---
@@ -271,7 +185,7 @@ export const GreenInvestment = () => {
     const openInvestModal = (project: Project) => {
         setInvestProject(project);
         setInvestCredits('10'); // Default
-        setInvestAmount((10 * project.pricePerUnit).toFixed(2));
+        setInvestAmount((10 * project.price_per_unit).toFixed(2));
         setIsNegotiating(false);
         setNegotiationPrice('');
         setNegotiationMessage('');
@@ -283,7 +197,7 @@ export const GreenInvestment = () => {
         if (investProject && val) {
             const num = parseFloat(val);
             if (!isNaN(num)) {
-                setInvestAmount((num * investProject.pricePerUnit).toFixed(2));
+                setInvestAmount((num * investProject.price_per_unit).toFixed(2));
             }
         }
     };
@@ -293,7 +207,7 @@ export const GreenInvestment = () => {
         if (investProject && val) {
             const num = parseFloat(val);
             if (!isNaN(num)) {
-                setInvestCredits((num / investProject.pricePerUnit).toFixed(2));
+                setInvestCredits((num / investProject.price_per_unit).toFixed(2));
             }
         }
     };
@@ -333,7 +247,7 @@ export const GreenInvestment = () => {
             let bestScore = 0;
 
             projects.forEach(p => {
-                const score = (p.creditsPerUnit / p.pricePerUnit) * ratingWeight[p.qualityRating];
+                const score = (p.credits_per_unit / p.price_per_unit) * (ratingWeight[p.quality_rating] || 1);
                 if (score > bestScore) {
                     bestScore = score;
                     bestProject = p;
@@ -349,27 +263,27 @@ export const GreenInvestment = () => {
     // Filter & Sort Logic
     const filteredProjects = useMemo(() => {
         const result = projects.filter(p => {
-            if (p.pricePerUnit < priceRange[0] || p.pricePerUnit > priceRange[1]) return false;
+            if (p.price_per_unit < priceRange[0] || p.price_per_unit > priceRange[1]) return false;
             if (selectedType !== 'all' && p.category !== selectedType) return false;
             // Simplified rating filter logic for demo
-            if (minRating === 'AAA' && p.qualityRating !== 'AAA') return false;
-            if (minRating === 'AA' && (p.qualityRating === 'A' || p.qualityRating === 'B+')) return false;
+            if (minRating === 'AAA' && p.quality_rating !== 'AAA') return false;
+            if (minRating === 'AA' && (p.quality_rating === 'A' || p.quality_rating === 'B+')) return false;
             return true;
         });
 
         switch (sortBy) {
             case 'price-asc':
-                return [...result].sort((a, b) => a.pricePerUnit - b.pricePerUnit);
+                return [...result].sort((a, b) => a.price_per_unit - b.price_per_unit);
             case 'price-desc':
-                return [...result].sort((a, b) => b.pricePerUnit - a.pricePerUnit);
+                return [...result].sort((a, b) => b.price_per_unit - a.price_per_unit);
             case 'credits-desc':
-                return [...result].sort((a, b) => b.creditsPerUnit - a.creditsPerUnit);
+                return [...result].sort((a, b) => b.credits_per_unit - a.credits_per_unit);
             case 'funding-desc':
-                return [...result].sort((a, b) => b.fundingPercentage - a.fundingPercentage);
+                return [...result].sort((a, b) => b.funding_percentage - a.funding_percentage);
             default:
                 return result;
         }
-    }, [priceRange, selectedType, minRating, sortBy]);
+    }, [projects, priceRange, selectedType, minRating, sortBy]);
 
     // Smart Mix Logic
     const generateSmartMix = () => {
@@ -585,12 +499,12 @@ export const GreenInvestment = () => {
                                 <div className="absolute top-2 right-2 flex gap-1">
                                     <Badge variant="secondary" className="backdrop-blur-md bg-black/40 text-white border-0 text-[10px] h-5">
                                         <CheckCircle2 className="w-3 h-3 mr-1 text-green-400" />
-                                        {project.verifiedBy}
+                                        {project.verified_by}
                                     </Badge>
                                 </div>
                                 <div className="absolute bottom-2 left-2">
                                     <Badge variant="secondary" className="backdrop-blur-md bg-white/90 text-black border-0 text-[10px] shadow-sm">
-                                        SDG: {project.sdgGoals.join(', ')}
+                                        SDG: {project.sdg_goals?.join(', ') || '13'}
                                     </Badge>
                                 </div>
                             </div>
@@ -601,7 +515,7 @@ export const GreenInvestment = () => {
                                         <CategoryIcon category={project.category} />
                                         {project.category}
                                     </Badge>
-                                    <QualityBadge rating={project.qualityRating} />
+                                    <QualityBadge rating={project.quality_rating} />
                                 </div>
                                 <CardTitle className="text-base leading-tight mt-1">{project.title}</CardTitle>
                                 <p className="text-xs text-muted-foreground mt-1 max-w-[200px] truncate">{project.location}</p>
@@ -622,20 +536,20 @@ export const GreenInvestment = () => {
                                 <div className="space-y-1.5">
                                     <div className="flex justify-between text-[10px] font-medium text-muted-foreground">
                                         <span>Funded</span>
-                                        <span>{project.fundingPercentage}%</span>
+                                        <span>{project.funding_percentage}%</span>
                                     </div>
-                                    <Progress value={project.fundingPercentage} className="h-1.5" />
+                                    <Progress value={project.funding_percentage} className="h-1.5" />
                                 </div>
 
                                 <Separator />
 
                                 <div className="flex justify-between items-center pt-1">
                                     <div>
-                                        <p className="font-bold text-base">€{project.pricePerUnit.toFixed(2)}</p>
+                                        <p className="font-bold text-base">€{project.price_per_unit.toFixed(2)}</p>
                                         <p className="text-[10px] text-muted-foreground">per unit</p>
                                     </div>
                                     <div className="text-right">
-                                        <p className="font-bold text-sm text-green-600">+{project.creditsPerUnit}</p>
+                                        <p className="font-bold text-sm text-green-600">+{project.credits_per_unit}</p>
                                         <p className="text-[10px] text-muted-foreground">Credits</p>
                                     </div>
                                 </div>
@@ -754,15 +668,15 @@ export const GreenInvestment = () => {
                         <TableBody>
                             <TableRow>
                                 <TableCell className="font-medium">Price</TableCell>
-                                {projects.filter(p => comparisonList.includes(p.id)).map(p => <TableCell key={p.id}>€{p.pricePerUnit}</TableCell>)}
+                                {projects.filter(p => comparisonList.includes(p.id)).map(p => <TableCell key={p.id}>€{p.price_per_unit}</TableCell>)}
                             </TableRow>
                             <TableRow>
                                 <TableCell className="font-medium">Credits/Unit</TableCell>
-                                {projects.filter(p => comparisonList.includes(p.id)).map(p => <TableCell key={p.id}>{p.creditsPerUnit}</TableCell>)}
+                                {projects.filter(p => comparisonList.includes(p.id)).map(p => <TableCell key={p.id}>{p.credits_per_unit}</TableCell>)}
                             </TableRow>
                             <TableRow>
                                 <TableCell className="font-medium">Rating</TableCell>
-                                {projects.filter(p => comparisonList.includes(p.id)).map(p => <TableCell key={p.id}><QualityBadge rating={p.qualityRating} /></TableCell>)}
+                                {projects.filter(p => comparisonList.includes(p.id)).map(p => <TableCell key={p.id}><QualityBadge rating={p.quality_rating} /></TableCell>)}
                             </TableRow>
                             <TableRow>
                                 <TableCell className="font-medium">Location</TableCell>
@@ -770,7 +684,7 @@ export const GreenInvestment = () => {
                             </TableRow>
                             <TableRow>
                                 <TableCell className="font-medium">Verified By</TableCell>
-                                {projects.filter(p => comparisonList.includes(p.id)).map(p => <TableCell key={p.id}>{p.verifiedBy}</TableCell>)}
+                                {projects.filter(p => comparisonList.includes(p.id)).map(p => <TableCell key={p.id}>{p.verified_by}</TableCell>)}
                             </TableRow>
                         </TableBody>
                     </Table>

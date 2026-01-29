@@ -6,26 +6,38 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Bell, Lock, User, Moon, Sun, Monitor, LogOut } from "lucide-react";
+import { useProfile } from "@/hooks/useProfile";
+import { useToast } from "@/hooks/use-toast";
+import { seedDemoData } from "@/lib/demo-data";
+import { useAuth } from "@/contexts/AuthContext";
+import { Database, RotateCcw } from "lucide-react";
 
 export const SettingsPanel = () => {
+    const { profile, loading, updateProfile } = useProfile();
+    const { user } = useAuth();
+    const { toast } = useToast();
+    const [isSeeding, setIsSeeding] = useState(false);
     const [isDark, setIsDark] = useState(false);
     const [emailNotifs, setEmailNotifs] = useState(true);
     const [marketingEmails, setMarketingEmails] = useState(false);
 
-    // Initialize state from localStorage
-    const [userData, setUserData] = useState({
+    const [formData, setFormData] = useState({
         name: "",
         email: "",
-        company: ""
+        company: "",
+        mobile: ""
     });
 
     useEffect(() => {
-        setUserData({
-            name: localStorage.getItem('user_name') || "Yash Garg",
-            email: localStorage.getItem('user_email') || "yash@greenbridge.finance",
-            company: localStorage.getItem('user_company') || "GreenFlux Inc."
-        });
-    }, []);
+        if (profile) {
+            setFormData({
+                name: profile.name || "",
+                email: profile.email || "",
+                company: profile.company || "",
+                mobile: profile.mobile || ""
+            });
+        }
+    }, [profile]);
 
     useEffect(() => {
         // Sync with current theme on mount
@@ -45,6 +57,41 @@ export const SettingsPanel = () => {
         // Dispatch a custom event so AppSidebar can update if it listens (optional, or just rely on shared DOM state)
         window.dispatchEvent(new Event('storage'));
     };
+
+    const handleSaveProfile = async () => {
+        const success = await updateProfile({
+            name: formData.name,
+            company: formData.company,
+            mobile: formData.mobile
+        });
+
+        if (!success) {
+            toast({
+                title: "Update failed",
+                description: "Failed to save profile changes",
+                variant: "destructive"
+            });
+        }
+    };
+
+    const getInitials = (name: string) => {
+        return name
+            .split(' ')
+            .map(n => n[0])
+            .join('')
+            .toUpperCase()
+            .slice(0, 2);
+    };
+
+    if (loading) {
+        return (
+            <div className="space-y-6 max-w-4xl mx-auto pb-12">
+                <div className="text-center py-12">
+                    <p className="text-muted-foreground">Loading settings...</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-6 max-w-4xl mx-auto pb-12">
@@ -66,7 +113,7 @@ export const SettingsPanel = () => {
                     <div className="flex items-center gap-6">
                         <Avatar className="h-20 w-20">
                             <AvatarImage src="/placeholder-avatar.jpg" />
-                            <AvatarFallback className="text-xl">YG</AvatarFallback>
+                            <AvatarFallback className="text-xl">{getInitials(formData.name || "U N")}</AvatarFallback>
                         </Avatar>
                         <Button variant="outline">Change Avatar</Button>
                     </div>
@@ -74,23 +121,40 @@ export const SettingsPanel = () => {
                     <div className="grid md:grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <Label htmlFor="name">Full Name</Label>
-                            <Input id="name" defaultValue="Yash Garg" />
+                            <Input
+                                id="name"
+                                value={formData.name}
+                                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                            />
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="email">Email</Label>
-                            <Input id="email" defaultValue="yash@greenbridge.finance" />
+                            <Input
+                                id="email"
+                                value={formData.email}
+                                disabled
+                                className="bg-muted"
+                            />
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="company">Company</Label>
-                            <Input id="company" defaultValue="GreenFlux Inc." />
+                            <Input
+                                id="company"
+                                value={formData.company}
+                                onChange={(e) => setFormData({ ...formData, company: e.target.value })}
+                            />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="role">Role</Label>
-                            <Input id="role" defaultValue="Sustainability Manager" disabled className="bg-muted" />
+                            <Label htmlFor="mobile">Mobile</Label>
+                            <Input
+                                id="mobile"
+                                value={formData.mobile}
+                                onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
+                            />
                         </div>
                     </div>
                     <div className="flex justify-end">
-                        <Button>Save Changes</Button>
+                        <Button onClick={handleSaveProfile}>Save Changes</Button>
                     </div>
                 </CardContent>
             </Card>
@@ -184,6 +248,51 @@ export const SettingsPanel = () => {
                     </div>
                 </CardContent>
             </Card>
-        </div>
+
+            {/* Demo Data Zone */}
+            <Card className="border-indigo-500/20 bg-indigo-500/5">
+                <CardHeader>
+                    <CardTitle className="text-indigo-600 flex items-center gap-2">
+                        <Database className="h-5 w-5" />
+                        Demo Data
+                    </CardTitle>
+                    <CardDescription>Actions for presentation and testing.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <p className="font-medium">Populate Demo Content</p>
+                            <p className="text-sm text-muted-foreground">Injects realistic sample data into your Dashboard, Map, and Projects.</p>
+                        </div>
+                        <Button
+                            variant="default"
+                            className="bg-indigo-600 hover:bg-indigo-700"
+                            disabled={isSeeding}
+                            onClick={async () => {
+                                if (!user) return;
+                                setIsSeeding(true);
+                                const success = await seedDemoData(user.id);
+                                setIsSeeding(false);
+                                if (success) {
+                                    toast({
+                                        title: "Demo Data Injected! 🚀",
+                                        description: "Please refresh the dashboard to see lively content.",
+                                    });
+                                } else {
+                                    toast({
+                                        title: "Injection Failed",
+                                        description: "Check if all tables (projects, cbam_calculations, compliance_deadlines) exist.",
+                                        variant: "destructive"
+                                    });
+                                }
+                            }}
+                        >
+                            {isSeeding ? <RotateCcw className="h-4 w-4 animate-spin mr-2" /> : <Database className="h-4 w-4 mr-2" />}
+                            {isSeeding ? 'Injecting...' : 'Inject Real-time Data'}
+                        </Button>
+                    </div>
+                </CardContent>
+            </Card >
+        </div >
     );
 };

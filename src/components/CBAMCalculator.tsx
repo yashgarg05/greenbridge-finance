@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Calculator, TrendingUp, AlertTriangle, Info } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Calculator, TrendingUp, AlertTriangle, Info, Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -23,6 +23,7 @@ import {
   type CommodityType,
   type CBAMResult,
 } from '@/lib/cbam-calculator';
+import { useCalculations } from '@/hooks/useCalculations';
 
 const commodities: { value: CommodityType; label: string }[] = [
   { value: 'steel', label: 'Steel' },
@@ -38,6 +39,8 @@ export function CBAMCalculator() {
   const [quantity, setQuantity] = useState<string>('1000');
   const [country, setCountry] = useState<string>('China');
   const [result, setResult] = useState<CBAMResult | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const { saveCalculation } = useCalculations();
 
   const handleCalculate = () => {
     const input = {
@@ -47,6 +50,14 @@ export function CBAMCalculator() {
     };
     const calculation = calculateCBAMLiability(input);
     setResult(calculation);
+  };
+
+  const handleSaveCalculation = async () => {
+    if (!result) return;
+
+    setIsSaving(true);
+    await saveCalculation(commodityType, parseFloat(quantity) || 0, country, result);
+    setIsSaving(false);
   };
 
   return (
@@ -129,6 +140,19 @@ export function CBAMCalculator() {
               <Calculator className="mr-2 h-4 w-4" />
               Calculate Liability
             </Button>
+
+            {result && (
+              <Button
+                onClick={handleSaveCalculation}
+                variant="outline"
+                className="w-full mt-2"
+                size="lg"
+                disabled={isSaving}
+              >
+                <Save className="mr-2 h-4 w-4" />
+                {isSaving ? 'Saving...' : 'Save Calculation'}
+              </Button>
+            )}
           </CardContent>
         </Card>
 

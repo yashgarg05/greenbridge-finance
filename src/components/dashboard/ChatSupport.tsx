@@ -3,7 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { MessageCircle, X, Send, Bot, User } from "lucide-react";
+import { MessageCircle, X, Send, Bot, User, Key, Loader2, Trash2 } from "lucide-react";
+import { generateChatResponse } from "@/lib/gemini";
+import { useToast } from "@/hooks/use-toast";
 
 interface Message {
     id: string;
@@ -12,57 +14,61 @@ interface Message {
     timestamp: Date;
 }
 
-const QA_DATA = [
-    {
-        keywords: ['greenbridge', 'what is', 'platform'],
-        answer: "GreenBridge is a comprehensive comprehensive platform for accurate CBAM compliance, carbon debt calculation, and verified green investments."
-    },
-    {
-        keywords: ['cbam', 'adjustment', 'mechanism'],
-        answer: "The Carbon Border Adjustment Mechanism (CBAM) is a tariff on carbon-intensive products entering the EU, designed to prevent carbon leakage."
-    },
-    {
-        keywords: ['carbon credit', 'credit', 'offset'],
-        answer: "A carbon credit represents one tonne of CO2 removed or avoided from the atmosphere. You can purchase these to offset your unavoidable emissions."
-    },
-    {
-        keywords: ['invest', 'marketplace', 'projects'],
-        answer: "Our Green Investment Marketplace allows you to fund verified global projects (Solar, Forestry, etc.) and receive high-integrity carbon credits in return."
-    },
-    {
-        keywords: ['compliance', 'deadline', 'report'],
-        answer: "CBAM compliance involves quarterly reporting of embedded emissions. Our platform automates this tracking and report generation to ensure you meet all deadlines."
-    },
-    {
-        keywords: ['hello', 'hi', 'hey'],
-        answer: "Hello! I am the GreenBridge AI Assistant. You can ask me about CBAM, Carbon Credits, or how to use this platform."
-    }
-];
-
 export const ChatSupport = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState<Message[]>([
         {
             id: '1',
-            text: "Hi there! 👋 I can help you with questions about GreenBridge, CBAM compliance, or investing. What's on your mind?",
+            text: "Hi there! 👋 I am Alex, your AI Advisor. To get started, please provide your Google Gemini API Key.",
             sender: 'bot',
             timestamp: new Date()
         }
     ]);
     const [inputValue, setInputValue] = useState("");
+    const [apiKey, setApiKey] = useState(localStorage.getItem("greenbridge_gemini_key") || "");
+    const [isLoading, setIsLoading] = useState(false);
     const scrollRef = useRef<HTMLDivElement>(null);
+    const { toast } = useToast();
 
     // Auto-scroll to bottom
     useEffect(() => {
         if (scrollRef.current) {
             scrollRef.current.scrollIntoView({ behavior: "smooth" });
         }
-    }, [messages, isOpen]);
+    }, [messages, isOpen, isLoading]);
 
-    const handleSendMessage = (e?: React.FormEvent) => {
+    const handleSaveKey = (key: string) => {
+        if (!key.trim()) return;
+        localStorage.setItem("greenbridge_gemini_key", key);
+        setApiKey(key);
+        setMessages(prev => [...prev, {
+            id: Date.now().toString(),
+            text: "Great! I am connected to the GreenBridge brain. Ask me anything about CBAM, credits, or your documents.",
+            sender: 'bot',
+            timestamp: new Date()
+        }]);
+    };
+
+    const handleClearKey = () => {
+        localStorage.removeItem("greenbridge_gemini_key");
+        setApiKey("");
+        setMessages([{
+            id: Date.now().toString(),
+            text: "API Key cleared. Please enter a new key to continue.",
+            sender: 'bot',
+            timestamp: new Date()
+        }]);
+    };
+
+    const handleSendMessage = async (e?: React.FormEvent) => {
         e?.preventDefault();
 
         if (!inputValue.trim()) return;
+        if (!apiKey) {
+            handleSaveKey(inputValue);
+            setInputValue("");
+            return;
+        }
 
         const userMsg: Message = {
             id: Date.now().toString(),
@@ -73,20 +79,18 @@ export const ChatSupport = () => {
 
         setMessages(prev => [...prev, userMsg]);
         setInputValue("");
+        setIsLoading(true);
 
-        // Process Bot Response
-        setTimeout(() => {
-            const lowerInput = userMsg.text.toLowerCase();
-            let responseText = "Sorry! I cannot assist you with that. Please try asking about CBAM, Carbon Credits, or GreenBridge features.";
+        try {
+            // Prepare history for context
+            const history = messages
+                .filter(m => m.id !== '1' && !m.text.includes("API Key")) // Filter out system/setup messages roughly
+                .map(m => ({
+                    role: m.sender === 'user' ? "user" as const : "model" as const,
+                    parts: m.text
+                }));
 
-            // Simple match logic
-            const match = QA_DATA.find(qa =>
-                qa.keywords.some(keyword => lowerInput.includes(keyword))
-            );
-
-            if (match) {
-                responseText = match.answer;
-            }
+            const responseText = await generateChatResponse(userMsg.text, apiKey, history);
 
             setMessages(prev => [...prev, {
                 id: (Date.now() + 1).toString(),
@@ -94,7 +98,16 @@ export const ChatSupport = () => {
                 sender: 'bot',
                 timestamp: new Date()
             }]);
-        }, 600);
+        } catch (error) {
+            setMessages(prev => [...prev, {
+                id: (Date.now() + 1).toString(),
+                text: "I encountered an error connecting to the AI. Please check your API Key.",
+                sender: 'bot',
+                timestamp: new Date()
+            }]);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -108,16 +121,23 @@ export const ChatSupport = () => {
                                 <Bot className="h-5 w-5 text-primary" />
                             </div>
                             <div>
-                                <CardTitle className="text-sm font-bold">GreenBridge Support</CardTitle>
+                                <CardTitle className="text-sm font-bold">GreenBridge AI</CardTitle>
                                 <p className="text-[10px] text-muted-foreground flex items-center gap-1">
-                                    <span className="block w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                                    Online
+                                    <span className={`block w-1.5 h-1.5 rounded-full animate-pulse ${apiKey ? 'bg-green-500' : 'bg-yellow-500'}`} />
+                                    {apiKey ? 'Online' : 'Setup Required'}
                                 </p>
                             </div>
                         </div>
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setIsOpen(false)}>
-                            <X className="h-4 w-4" />
-                        </Button>
+                        <div className="flex gap-1">
+                            {apiKey && (
+                                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-red-500" onClick={handleClearKey} title="Reset API Key">
+                                    <Trash2 className="h-3 w-3" />
+                                </Button>
+                            )}
+                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setIsOpen(false)}>
+                                <X className="h-4 w-4" />
+                            </Button>
+                        </div>
                     </CardHeader>
 
                     <CardContent className="p-0 flex-1 overflow-hidden relative bg-muted/20">
@@ -134,16 +154,25 @@ export const ChatSupport = () => {
                                             {msg.sender === 'user' ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
                                         </div>
                                         <div className={`rounded-2xl px-4 py-2 text-sm shadow-sm ${msg.sender === 'user'
-                                                ? 'bg-indigo-500 text-white rounded-tr-none'
-                                                : 'bg-background border rounded-tl-none'
+                                            ? 'bg-indigo-500 text-white rounded-tr-none'
+                                            : 'bg-background border rounded-tl-none'
                                             }`}>
                                             {msg.text}
-                                            <p className={`text-[9px] mt-1 opacity-70 ${msg.sender === 'user' ? 'text-indigo-100' : 'text-muted-foreground'}`}>
-                                                {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                            </p>
                                         </div>
                                     </div>
                                 ))}
+                                {isLoading && (
+                                    <div className="flex gap-2 max-w-[85%]">
+                                        <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                                            <Bot className="h-4 w-4" />
+                                        </div>
+                                        <div className="bg-background border rounded-2xl rounded-tl-none px-4 py-3 shadow-sm flex items-center gap-1">
+                                            <span className="w-1.5 h-1.5 bg-primary/40 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+                                            <span className="w-1.5 h-1.5 bg-primary/40 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+                                            <span className="w-1.5 h-1.5 bg-primary/40 rounded-full animate-bounce"></span>
+                                        </div>
+                                    </div>
+                                )}
                                 {/* Dummy div for auto-scroll */}
                                 <div ref={scrollRef} />
                             </div>
@@ -151,20 +180,42 @@ export const ChatSupport = () => {
                     </CardContent>
 
                     <CardFooter className="p-3 border-t bg-background">
-                        <form
-                            className="flex w-full gap-2"
-                            onSubmit={handleSendMessage}
-                        >
-                            <Input
-                                placeholder="Type your question..."
-                                value={inputValue}
-                                onChange={(e) => setInputValue(e.target.value)}
-                                className="flex-1 focus-visible:ring-indigo-500"
-                            />
-                            <Button type="submit" size="icon" disabled={!inputValue.trim()} className="bg-indigo-600 hover:bg-indigo-700">
-                                <Send className="h-4 w-4" />
-                            </Button>
-                        </form>
+                        {!apiKey ? (
+                            <div className="w-full space-y-2">
+                                <p className="text-xs text-muted-foreground text-center">🔑 Enter your Google Gemini API Key to enable AI.</p>
+                                <form className="flex w-full gap-2" onSubmit={handleSendMessage}>
+                                    <div className="relative flex-1">
+                                        <Key className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                                        <Input
+                                            type="password"
+                                            placeholder="Paste gemini-pro key..."
+                                            value={inputValue}
+                                            onChange={(e) => setInputValue(e.target.value)}
+                                            className="pl-9 focus-visible:ring-indigo-500"
+                                        />
+                                    </div>
+                                    <Button type="submit" disabled={!inputValue.trim()} className="bg-green-600 hover:bg-green-700">
+                                        Save
+                                    </Button>
+                                </form>
+                            </div>
+                        ) : (
+                            <form
+                                className="flex w-full gap-2"
+                                onSubmit={handleSendMessage}
+                            >
+                                <Input
+                                    placeholder="Ask Alex anything..."
+                                    value={inputValue}
+                                    onChange={(e) => setInputValue(e.target.value)}
+                                    className="flex-1 focus-visible:ring-indigo-500"
+                                    disabled={isLoading}
+                                />
+                                <Button type="submit" size="icon" disabled={!inputValue.trim() || isLoading} className="bg-indigo-600 hover:bg-indigo-700">
+                                    {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                                </Button>
+                            </form>
+                        )}
                     </CardFooter>
                 </Card>
             )}

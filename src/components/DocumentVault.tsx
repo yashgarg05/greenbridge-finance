@@ -1,42 +1,41 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FileText, Upload, CheckCircle2, Circle, AlertCircle, Paperclip, X, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
+import { useDocuments } from '@/hooks/useDocuments';
+import { useChecklist } from '@/hooks/useChecklist';
+import { Document as SupabaseDocument } from '@/lib/supabase';
 
 interface ChecklistItem {
   id: string;
+  item_key: string;
   title: string;
   description: string;
   completed: boolean;
   required: boolean;
 }
 
-interface UploadedFile {
-  id: string;
-  name: string;
-  size: string;
-  uploadedAt: Date;
-  type: string;
-}
-
-const CHECKLIST_ITEMS: ChecklistItem[] = [
+const DEFAULT_CHECKLIST_ITEMS: ChecklistItem[] = [
   {
     id: 'auth-1',
+    item_key: 'auth-1',
     title: 'Register as CBAM Declarant',
     description: 'Complete registration in the EU CBAM Transitional Registry',
-    completed: true,
+    completed: false,
     required: true,
   },
   {
     id: 'auth-2',
+    item_key: 'auth-2',
     title: 'Obtain EORI Number',
     description: 'Economic Operators Registration and Identification number',
-    completed: true,
+    completed: false,
     required: true,
   },
   {
     id: 'auth-3',
+    item_key: 'auth-3',
     title: 'Declarant Authorization Form',
     description: 'Submit signed authorization to act on behalf of importer',
     completed: false,
@@ -44,6 +43,7 @@ const CHECKLIST_ITEMS: ChecklistItem[] = [
   },
   {
     id: 'auth-4',
+    item_key: 'auth-4',
     title: 'Supplier Emission Certificates',
     description: 'Collect verified emission data from all suppliers',
     completed: false,
@@ -51,6 +51,7 @@ const CHECKLIST_ITEMS: ChecklistItem[] = [
   },
   {
     id: 'auth-5',
+    item_key: 'auth-5',
     title: 'Customs Import Documentation',
     description: 'Gather all relevant customs declarations',
     completed: false,
@@ -58,6 +59,7 @@ const CHECKLIST_ITEMS: ChecklistItem[] = [
   },
   {
     id: 'auth-6',
+    item_key: 'auth-6',
     title: 'Third-Party Verification Report',
     description: 'Optional verification by accredited verifier',
     completed: false,
@@ -66,36 +68,54 @@ const CHECKLIST_ITEMS: ChecklistItem[] = [
 ];
 
 export function DocumentVault() {
-  const [checklist, setChecklist] = useState<ChecklistItem[]>(CHECKLIST_ITEMS);
-  const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([
-    {
-      id: 'file-1',
-      name: 'EORI_Certificate_2024.pdf',
-      size: '245 KB',
-      uploadedAt: new Date('2024-01-15'),
-      type: 'pdf',
-    },
-    {
-      id: 'file-2',
-      name: 'Supplier_Emissions_Steel_Q1.xlsx',
-      size: '1.2 MB',
-      uploadedAt: new Date('2024-02-20'),
-      type: 'xlsx',
-    },
-  ]);
+  const [checklist, setChecklist] = useState<ChecklistItem[]>([]);
+  const [uploadedFiles, setUploadedFiles] = useState<SupabaseDocument[]>([]);
   const [isDragging, setIsDragging] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+
+  const { uploadDocument, getDocuments, downloadDocument, deleteDocument } = useDocuments();
+  const { getChecklistItems, initializeChecklist, toggleChecklistItem } = useChecklist();
+
+  // Load checklist and documents on mount
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    // Load or initialize checklist
+    const items = await getChecklistItems();
+    if (items.length === 0) {
+      await initializeChecklist(DEFAULT_CHECKLIST_ITEMS);
+      const newItems = await getChecklistItems();
+      setChecklist(newItems);
+    } else {
+      setChecklist(items);
+    }
+
+    // Load documents
+    const docs = await getDocuments();
+    setUploadedFiles(docs);
+  };
 
   const completedCount = checklist.filter((item) => item.completed).length;
   const requiredCount = checklist.filter((item) => item.required).length;
   const completedRequired = checklist.filter((item) => item.required && item.completed).length;
   const progress = Math.round((completedRequired / requiredCount) * 100);
 
-  const toggleItem = (id: string) => {
-    setChecklist((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, completed: !item.completed } : item
-      )
-    );
+  const toggleItem = async (itemKey: string) => {
+    const item = checklist.find((i) => i.item_key === itemKey);
+    if (!item) return;
+
+    const newCompleted = !item.completed;
+    const success = await toggleChecklistItem(itemKey, newCompleted);
+
+    if (success) {
+      setChecklist((prev) =>
+        prev.map((i) =>
+          i.item_key === itemKey ? { ...i, completed: newCompleted } : i
+        )
+      );
+    }
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -105,37 +125,41 @@ export function DocumentVault() {
 
   const handleDragLeave = () => setIsDragging(false);
 
-  const handleDrop = (e: React.DragEvent) => {
+  const handleDrop = async (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
-    
+
     const files = Array.from(e.dataTransfer.files);
-    const newFiles: UploadedFile[] = files.map((file, index) => ({
-      id: `file-${Date.now()}-${index}`,
-      name: file.name,
-      size: formatFileSize(file.size),
-      uploadedAt: new Date(),
-      type: file.name.split('.').pop() || 'unknown',
-    }));
-    
-    setUploadedFiles((prev) => [...prev, ...newFiles]);
+    await uploadFiles(files);
   };
 
-  const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileInput = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    const newFiles: UploadedFile[] = files.map((file, index) => ({
-      id: `file-${Date.now()}-${index}`,
-      name: file.name,
-      size: formatFileSize(file.size),
-      uploadedAt: new Date(),
-      type: file.name.split('.').pop() || 'unknown',
-    }));
-    
-    setUploadedFiles((prev) => [...prev, ...newFiles]);
+    await uploadFiles(files);
   };
 
-  const removeFile = (id: string) => {
-    setUploadedFiles((prev) => prev.filter((f) => f.id !== id));
+  const uploadFiles = async (files: File[]) => {
+    setIsUploading(true);
+
+    for (const file of files) {
+      const doc = await uploadDocument(file);
+      if (doc) {
+        setUploadedFiles((prev) => [doc, ...prev]);
+      }
+    }
+
+    setIsUploading(false);
+  };
+
+  const removeFile = async (doc: SupabaseDocument) => {
+    const success = await deleteDocument(doc);
+    if (success) {
+      setUploadedFiles((prev) => prev.filter((f) => f.id !== doc.id));
+    }
+  };
+
+  const handleDownload = async (doc: SupabaseDocument) => {
+    await downloadDocument(doc);
   };
 
   const formatFileSize = (bytes: number): string => {
@@ -177,30 +201,33 @@ export function DocumentVault() {
           <CardContent className="space-y-3">
             {checklist.map((item) => (
               <button
-                key={item.id}
-                onClick={() => toggleItem(item.id)}
-                className={`w-full text-left p-3 rounded-lg border transition-all ${
-                  item.completed
-                    ? 'bg-success/5 border-success/30'
-                    : 'bg-muted/20 border-border hover:border-primary/30'
-                }`}
+                key={item.item_key}
+                onClick={() => toggleItem(item.item_key)}
+                className={`w-full text-left p-3 rounded-lg border transition-all ${item.completed
+                  ? 'bg-success/5 border-success/30'
+                  : 'bg-muted/20 border-border hover:border-primary/30'
+                  }`}
               >
                 <div className="flex items-start gap-3">
-                  {item.completed ? (
-                    <CheckCircle2 className="h-5 w-5 text-success flex-shrink-0 mt-0.5" />
-                  ) : (
-                    <Circle className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
-                  )}
+                  <div className="mt-0.5">
+                    {item.completed ? (
+                      <CheckCircle2 className="h-5 w-5 text-success" />
+                    ) : (
+                      <Circle className="h-5 w-5 text-muted-foreground" />
+                    )}
+                  </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className={`font-medium ${item.completed ? 'line-through text-muted-foreground' : ''}`}>
-                        {item.title}
-                      </span>
-                      {item.required && !item.completed && (
-                        <span className="status-badge status-badge-warning text-[10px]">Required</span>
+                      <span className="font-medium text-sm">{item.title}</span>
+                      {item.required && (
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary/10 text-primary">
+                          Required
+                        </span>
                       )}
                     </div>
-                    <p className="text-xs text-muted-foreground mt-0.5">{item.description}</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {item.description}
+                    </p>
                   </div>
                 </div>
               </button>
@@ -208,104 +235,106 @@ export function DocumentVault() {
           </CardContent>
         </Card>
 
-        {/* File Upload */}
-        <div className="space-y-4">
-          <Card className="data-card">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-base">Upload Documents</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-                className={`border-2 border-dashed rounded-lg p-8 text-center transition-all ${
-                  isDragging
-                    ? 'border-primary bg-primary/5'
-                    : 'border-border hover:border-primary/50'
+        {/* Document Upload */}
+        <Card className="data-card">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-base">Upload Documents</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${isDragging
+                ? 'border-primary bg-primary/5'
+                : 'border-border hover:border-primary/50'
                 }`}
-              >
-                <Upload className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
-                <p className="text-sm font-medium">Drop files here or click to upload</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Supplier certificates, customs forms, verification reports
-                </p>
-                <input
-                  type="file"
-                  multiple
-                  onChange={handleFileInput}
-                  className="hidden"
-                  id="file-upload"
-                />
-                <Button variant="outline" size="sm" className="mt-4" asChild>
-                  <label htmlFor="file-upload" className="cursor-pointer">
-                    <Paperclip className="h-4 w-4 mr-2" />
-                    Browse Files
-                  </label>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+            >
+              <Upload className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
+              <p className="text-sm font-medium mb-1">Drop files here</p>
+              <p className="text-xs text-muted-foreground mb-4">
+                or click to browse • Max 10MB
+              </p>
+              <input
+                id="file-upload"
+                type="file"
+                className="hidden"
+                onChange={handleFileInput}
+                multiple
+              />
+              <Button asChild variant="outline" size="sm">
+                <label htmlFor="file-upload" className="cursor-pointer">
+                  <Paperclip className="h-4 w-4 mr-2" />
+                  Choose Files
+                </label>
+              </Button>
+            </div>
 
-          {/* Uploaded Files */}
-          <Card className="data-card">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-base">Uploaded Documents</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              {uploadedFiles.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-4">
-                  No documents uploaded yet
-                </p>
-              ) : (
-                uploadedFiles.map((file) => (
-                  <div
-                    key={file.id}
-                    className="flex items-center justify-between p-3 rounded-lg bg-muted/30 group"
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-8 h-8 rounded bg-primary/10 flex items-center justify-center flex-shrink-0">
-                        <FileText className="h-4 w-4 text-primary" />
+            <Card className="border-muted mt-6">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base">Uploaded Documents</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {isUploading && (
+                  <p className="text-sm text-muted-foreground text-center py-2">Uploading...</p>
+                )}
+                {uploadedFiles.length === 0 && !isUploading ? (
+                  <p className="text-sm text-muted-foreground text-center py-4">
+                    No documents uploaded yet
+                  </p>
+                ) : (
+                  uploadedFiles.map((file) => (
+                    <div
+                      key={file.id}
+                      className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-muted/30 transition-colors"
+                    >
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                        <FileText className="h-5 w-5 text-primary shrink-0" />
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium truncate">{file.name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {formatFileSize(file.file_size || 0)} • {new Date(file.created_at).toLocaleDateString()}
+                          </p>
+                        </div>
                       </div>
-                      <div className="min-w-0">
-                        <p className="text-sm font-medium truncate">{file.name}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {file.size} • {file.uploadedAt.toLocaleDateString()}
-                        </p>
+                      <div className="flex gap-1 shrink-0">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={() => handleDownload(file)}
+                        >
+                          <Download className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-destructive"
+                          onClick={() => removeFile(file)}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
                       </div>
                     </div>
-                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <Download className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-destructive"
-                        onClick={() => removeFile(file.id)}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                ))
-              )}
-            </CardContent>
-          </Card>
+                  ))
+                )}
+              </CardContent>
+            </Card>
+          </CardContent>
+        </Card>
 
-          {/* Warning */}
-          <Card className="data-card border-warning/30 bg-warning/5">
-            <CardContent className="pt-4 flex items-start gap-3">
-              <AlertCircle className="h-5 w-5 text-warning flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="text-sm font-medium text-warning">Compliance Deadline</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  First CBAM report due by 31 January 2025 for Q4 2024 imports
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        {/* Warning */}
+        <Card className="data-card border-warning/30 bg-warning/5">
+          <CardContent className="pt-4 flex items-start gap-3">
+            <AlertCircle className="h-5 w-5 text-warning flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-medium text-warning">Compliance Deadline</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                First CBAM report due by 31 January 2025 for Q4 2024 imports
+              </p>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
