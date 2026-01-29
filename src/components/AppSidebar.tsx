@@ -1,4 +1,4 @@
-import { Home, Calculator, ShoppingCart, FileText, Moon, Sun } from 'lucide-react';
+import { Home, Calculator, ShoppingCart, FileText, Moon, Sun, Sprout, ShieldCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useEffect, useState } from 'react';
 
@@ -9,6 +9,8 @@ interface AppSidebarProps {
 
 const navItems = [
   { id: 'overview', icon: Home, label: 'Home' },
+  { id: 'invest', icon: Sprout, label: 'Invest' },
+  { id: 'compliance', icon: ShieldCheck, label: 'Compliance' },
   { id: 'calculator', icon: Calculator, label: 'Calculator' },
   { id: 'documents', icon: FileText, label: 'Docs' },
 ];

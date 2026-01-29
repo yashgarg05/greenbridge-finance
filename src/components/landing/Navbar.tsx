@@ -1,13 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { TreeLogo } from "@/components/ui/TreeLogo";
 
 export const Navbar = () => {
     return (
         <nav className="fixed top-0 w-full z-50 bg-background/80 backdrop-blur-md border-b border-border/10">
             <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                    <TreeLogo />
                     <span className="font-semibold text-lg tracking-tight">GreenBridge</span>
                 </div>
 
@@ -18,7 +16,7 @@ export const Navbar = () => {
                 </div>
 
                 <div className="flex items-center gap-4">
-                    <Link to="/auth/login" className="text-sm font-medium hover:text-primary transition-colors">
+                    <Link to="/login" className="text-sm font-medium hover:text-primary transition-colors">
                         Login
                     </Link>
                     <Link to="/dashboard">

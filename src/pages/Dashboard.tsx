@@ -1,15 +1,22 @@
 import { useState } from 'react';
 import { AppSidebar } from '@/components/AppSidebar';
-import { CarbonDebtCard } from '@/components/CarbonDebtCard';
 import { CBAMCalculator } from '@/components/CBAMCalculator';
 import { DocumentVault } from '@/components/DocumentVault';
+import { ProjectInfo } from '@/components/dashboard/ProjectInfo';
+import { FormulaBreakdown } from '@/components/dashboard/FormulaBreakdown';
+import { GreenInvestment } from '@/components/dashboard/GreenInvestment';
+import { ComplianceControlPanel } from '@/components/dashboard/ComplianceControlPanel';
+import { VerifiedCreditsInfo } from '@/components/dashboard/VerifiedCreditsInfo';
 
 const Dashboard = () => {
     const [activeTab, setActiveTab] = useState('overview');
-    const [tonnes, setTonnes] = useState('1000');
 
     const renderContent = () => {
         switch (activeTab) {
+            case 'compliance':
+                return <ComplianceControlPanel />;
+            case 'invest':
+                return <GreenInvestment />;
             case 'calculator':
                 return <CBAMCalculator />;
             case 'documents':
@@ -19,15 +26,25 @@ const Dashboard = () => {
                     <div className="space-y-6">
                         {/* Header */}
                         <div>
-                            <h1 className="text-xl font-semibold">Dashboard</h1>
-                            <p className="text-sm text-muted-foreground">CBAM Compliance Overview</p>
+                            <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+                            <p className="text-muted-foreground">CBAM Compliance Overview & Financial Projections</p>
                         </div>
 
-                        {/* Main Grid */}
+                        {/* Main Layout */}
                         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                            {/* Left Column */}
-                            <div className="space-y-6 lg:col-span-1">
-                                <CarbonDebtCard tonnes={tonnes} onTonnesChange={setTonnes} />
+                            {/* Card 1: Verified Credits Info */}
+                            <div className="lg:col-span-2 h-full">
+                                <VerifiedCreditsInfo />
+                            </div>
+
+                            {/* Card 2: Project Info */}
+                            <div className="lg:col-span-1 h-full">
+                                <ProjectInfo />
+                            </div>
+
+                            {/* Row 2: Formula Breakdown */}
+                            <div className="lg:col-span-3">
+                                <FormulaBreakdown />
                             </div>
                         </div>
                     </div>

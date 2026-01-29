@@ -63,7 +63,7 @@ export const ContentSections = () => {
                                         <img
                                             src={section.image}
                                             alt={section.alt}
-                                            className="object-cover w-full h-full grayscale hover:grayscale-0 transition-all duration-700 ease-out"
+                                            className="object-cover w-full h-full transition-transform duration-700 ease-out hover:scale-105"
                                         />
                                         <div className="absolute inset-0 ring-1 ring-inset ring-black/10 rounded-2xl" />
                                     </div>

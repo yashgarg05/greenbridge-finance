@@ -15,6 +15,7 @@ import {
   calculateCBAMLiability,
   formatCurrency,
   formatNumber,
+  generateRecommendations,
   CURRENT_ETS_PRICE,
   PHASE_IN_MULTIPLIER_2026,
   EMISSION_FACTORS,
@@ -149,6 +150,39 @@ export function CBAMCalculator() {
                   </div>
                 </CardContent>
               </Card>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="col-span-2">
+                  <p className="text-sm font-semibold mb-3 flex items-center gap-2">
+                    <TrendingUp className="w-4 h-4 text-green-500" />
+                    Optimization Opportunities
+                  </p>
+                  <div className="grid gap-3">
+                    {generateRecommendations({ commodityType, importQuantity: parseFloat(quantity) || 0, countryOfOrigin: country }, result).map((rec, i) => (
+                      <Card key={i} className="border-l-4 border-l-green-500 bg-muted/20">
+                        <CardContent className="p-4">
+                          <div className="flex justify-between items-start mb-1">
+                            <div className="space-y-1">
+                              <p className="font-semibold text-sm">{rec.title}</p>
+                              {rec.potentialCredits && (rec.potentialCredits > 0) && (
+                                <div className="flex items-center gap-1.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-0.5 w-fit rounded text-[10px] font-bold uppercase tracking-wider border border-blue-200 dark:border-blue-800">
+                                  <span>Earn {rec.potentialCredits} Verified Credits</span>
+                                </div>
+                              )}
+                            </div>
+                            {rec.potentialSavingsEUR && (
+                              <span className="text-green-600 font-bold text-xs bg-green-100 px-2 py-1 rounded-full shrink-0">
+                                Save ~{formatCurrency(rec.potentialSavingsEUR)}
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-2">{rec.description}</p>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              </div>
 
               {/* Breakdown Cards */}
               <div className="grid grid-cols-2 gap-4">
