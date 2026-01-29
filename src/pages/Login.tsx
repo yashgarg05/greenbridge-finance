@@ -1,10 +1,18 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Apple } from "lucide-react";
 
 const Login = () => {
+    const navigate = useNavigate();
+    const [email, setEmail] = useState("");
+
+    const handleLogin = () => {
+        if (email) localStorage.setItem('user_email', email);
+        navigate('/dashboard');
+    };
     return (
         <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 relative overflow-hidden">
             {/* Background Pattern */}
@@ -26,13 +34,20 @@ const Login = () => {
                     <div className="space-y-4">
                         <div className="space-y-2">
                             <Label htmlFor="email">Email</Label>
-                            <Input id="email" type="email" placeholder="name@example.com" className="bg-background/50" />
+                            <Input
+                                id="email"
+                                type="email"
+                                placeholder="name@example.com"
+                                className="bg-background/50"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                            />
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="password">Password</Label>
                             <Input id="password" type="password" className="bg-background/50" />
                         </div>
-                        <Button className="w-full">Sign in</Button>
+                        <Button className="w-full" onClick={handleLogin}>Sign in</Button>
                     </div>
 
                     <div className="relative">

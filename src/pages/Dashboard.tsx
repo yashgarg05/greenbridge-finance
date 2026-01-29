@@ -11,6 +11,7 @@ import { ComplianceControlPanel } from '@/components/dashboard/ComplianceControl
 import { VerifiedCreditsInfo } from '@/components/dashboard/VerifiedCreditsInfo';
 import { FeatureShortcuts } from '@/components/dashboard/FeatureShortcuts';
 import { SettingsPanel } from '@/components/dashboard/SettingsPanel';
+import { ChatSupport } from '@/components/dashboard/ChatSupport';
 
 const Dashboard = () => {
     const [activeTab, setActiveTab] = useState('overview');
@@ -115,11 +116,14 @@ const Dashboard = () => {
                 <Sparkles className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity absolute -top-1 -right-1 text-yellow-300" />
             </button>
 
-            {/* Call Overlay Modal */}
+            {/* AI Call UI */}
             {isCallOpen && (
                 <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+                    {/* ... (Existing Call UI Content) ... actually I should verify I am not deleting content accidentally. 
+                        The replace block should be precise. 
+                        I will target the end of the return but BEFORE the closing div.
+                    */}
                     <div className="bg-background rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden border border-primary/20 animate-in fade-in zoom-in-95 duration-300">
-
                         {/* SETUP STAGE */}
                         {callStage === 'setup' && (
                             <div className="p-6 space-y-6">
@@ -227,6 +231,9 @@ const Dashboard = () => {
                     </div>
                 </div>
             )}
+
+            {/* Chatbot Widget */}
+            <ChatSupport />
         </div>
     );
 };

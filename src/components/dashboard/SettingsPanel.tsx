@@ -12,6 +12,21 @@ export const SettingsPanel = () => {
     const [emailNotifs, setEmailNotifs] = useState(true);
     const [marketingEmails, setMarketingEmails] = useState(false);
 
+    // Initialize state from localStorage
+    const [userData, setUserData] = useState({
+        name: "",
+        email: "",
+        company: ""
+    });
+
+    useEffect(() => {
+        setUserData({
+            name: localStorage.getItem('user_name') || "Yash Garg",
+            email: localStorage.getItem('user_email') || "yash@greenbridge.finance",
+            company: localStorage.getItem('user_company') || "GreenFlux Inc."
+        });
+    }, []);
+
     useEffect(() => {
         // Sync with current theme on mount
         const isDarkMode = document.documentElement.classList.contains('dark');

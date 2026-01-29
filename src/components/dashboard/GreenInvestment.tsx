@@ -43,6 +43,9 @@ import { Textarea } from "@/components/ui/textarea"; // Assuming Textarea exists
 // Wait, I should verify Textarea exists if I want to use it.
 // I will just use standard HTML textarea with standard shadcn style classes if I can't confirm.
 // "flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+import { Checkbox } from "@/components/ui/checkbox";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Bot } from "lucide-react";
 
 
 // --- Types ---
@@ -177,6 +180,7 @@ export const GreenInvestment = () => {
     const [priceRange, setPriceRange] = useState<[number, number]>([0, 200]);
     const [selectedType, setSelectedType] = useState<string>('all');
     const [minRating, setMinRating] = useState<string>('all');
+    const [sortBy, setSortBy] = useState<string>('featured');
 
     // Smart Mix
     const [emissionsInput, setEmissionsInput] = useState<string>('');
@@ -227,9 +231,50 @@ export const GreenInvestment = () => {
         }, 1000);
     };
 
-    // Filter Logic
+    // --- New Features State ---
+    const [comparisonList, setComparisonList] = useState<string[]>([]);
+    const [isComparisonOpen, setIsComparisonOpen] = useState(false);
+
+    const [aiRecommendation, setAiRecommendation] = useState<Project | null>(null);
+    const [isAiModalOpen, setIsAiModalOpen] = useState(false);
+    const [isAiLoading, setIsAiLoading] = useState(false);
+
+    const toggleComparison = (id: string, checked: boolean) => {
+        if (checked) {
+            setComparisonList(prev => [...prev, id]);
+        } else {
+            setComparisonList(prev => prev.filter(pId => pId !== id));
+        }
+    };
+
+    const handleAIRecommend = () => {
+        setIsAiLoading(true);
+        // Simulate complex analysis
+        setTimeout(() => {
+            // Logic: Find best value (Credits / Price) * Rating Weight
+            // Rating Weights: AAA=1.5, AA=1.2, A=1.0, B+=0.9
+            const ratingWeight = { 'AAA': 1.5, 'AA': 1.2, 'A': 1.0, 'B+': 0.9 };
+
+            let bestProject = projects[0];
+            let bestScore = 0;
+
+            projects.forEach(p => {
+                const score = (p.creditsPerUnit / p.pricePerUnit) * ratingWeight[p.qualityRating];
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestProject = p;
+                }
+            });
+
+            setAiRecommendation(bestProject);
+            setIsAiLoading(false);
+            setIsAiModalOpen(true);
+        }, 1500);
+    };
+
+    // Filter & Sort Logic
     const filteredProjects = useMemo(() => {
-        return projects.filter(p => {
+        const result = projects.filter(p => {
             if (p.pricePerUnit < priceRange[0] || p.pricePerUnit > priceRange[1]) return false;
             if (selectedType !== 'all' && p.category !== selectedType) return false;
             // Simplified rating filter logic for demo
@@ -237,7 +282,20 @@ export const GreenInvestment = () => {
             if (minRating === 'AA' && (p.qualityRating === 'A' || p.qualityRating === 'B+')) return false;
             return true;
         });
-    }, [priceRange, selectedType, minRating]);
+
+        switch (sortBy) {
+            case 'price-asc':
+                return [...result].sort((a, b) => a.pricePerUnit - b.pricePerUnit);
+            case 'price-desc':
+                return [...result].sort((a, b) => b.pricePerUnit - a.pricePerUnit);
+            case 'credits-desc':
+                return [...result].sort((a, b) => b.creditsPerUnit - a.creditsPerUnit);
+            case 'funding-desc':
+                return [...result].sort((a, b) => b.fundingPercentage - a.fundingPercentage);
+            default:
+                return result;
+        }
+    }, [priceRange, selectedType, minRating, sortBy]);
 
     // Smart Mix Logic
     const generateSmartMix = () => {
@@ -285,9 +343,29 @@ export const GreenInvestment = () => {
                     <h2 className="text-2xl font-bold tracking-tight">Carbon Credit Marketplace</h2>
                     <p className="text-muted-foreground">Advanced portfolio management for verified ecological credits.</p>
                 </div>
-                <Button onClick={() => setIsListingOpen(true)} className="gap-2">
-                    <Plus className="w-4 h-4" /> List Your Project
-                </Button>
+                <div className="flex gap-2">
+                    <Button
+                        variant="outline"
+                        className="gap-2 border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-900/20 dark:text-indigo-300 dark:border-indigo-800"
+                        onClick={handleAIRecommend}
+                        disabled={isAiLoading}
+                    >
+                        {isAiLoading ? <Sparkles className="w-4 h-4 animate-spin" /> : <Bot className="w-4 h-4" />}
+                        {isAiLoading ? "Analyzing..." : "AI Smart Recommend"}
+                    </Button>
+                    {comparisonList.length > 0 && (
+                        <Button
+                            variant="secondary"
+                            className="gap-2 animate-in fade-in"
+                            onClick={() => setIsComparisonOpen(true)}
+                        >
+                            <Filter className="w-4 h-4" /> Compare ({comparisonList.length})
+                        </Button>
+                    )}
+                    <Button onClick={() => setIsListingOpen(true)} className="gap-2">
+                        <Plus className="w-4 h-4" /> List Your Project
+                    </Button>
+                </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -351,6 +429,22 @@ export const GreenInvestment = () => {
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
+                            <div className="space-y-2">
+                                <Label className="text-xs">Sort By</Label>
+                                <Select value={sortBy} onValueChange={setSortBy}>
+                                    <SelectTrigger className="h-8">
+                                        <SelectValue placeholder="Sort By" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="featured">Featured</SelectItem>
+                                        <SelectItem value="price-asc">Price: Low to High</SelectItem>
+                                        <SelectItem value="price-desc">Price: High to Low</SelectItem>
+                                        <SelectItem value="credits-desc">Best Credit Yield</SelectItem>
+                                        <SelectItem value="funding-desc">Most Funded</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
                             <div className="space-y-2">
                                 <Label className="text-xs">Project Type</Label>
                                 <Select value={selectedType} onValueChange={setSelectedType}>
@@ -440,6 +534,15 @@ export const GreenInvestment = () => {
                             </CardHeader>
 
                             <CardContent className="px-4 pb-4 space-y-3 flex-1">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <Checkbox
+                                        id={`compare-${project.id}`}
+                                        checked={comparisonList.includes(project.id)}
+                                        onCheckedChange={(checked) => toggleComparison(project.id, checked as boolean)}
+                                    />
+                                    <Label htmlFor={`compare-${project.id}`} className="text-xs text-muted-foreground cursor-pointer">Compare</Label>
+                                </div>
+
                                 <p className="text-xs text-muted-foreground line-clamp-2 min-h-[2.5em]">{project.description}</p>
 
                                 <div className="space-y-1.5">
@@ -549,6 +652,90 @@ export const GreenInvestment = () => {
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setIsListingOpen(false)}>Cancel</Button>
                         <Button onClick={handleListingSubmit}>Submit for Verification</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog open={isComparisonOpen} onOpenChange={setIsComparisonOpen}>
+                <DialogContent className="max-w-4xl max-h-[80vh] overflow-auto">
+                    <DialogHeader>
+                        <DialogTitle>Project Comparison</DialogTitle>
+                        <DialogDescription>Side-by-side detailed analysis.</DialogDescription>
+                    </DialogHeader>
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Feature</TableHead>
+                                {projects.filter(p => comparisonList.includes(p.id)).map(p => <TableHead key={p.id}>{p.title}</TableHead>)}
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            <TableRow>
+                                <TableCell className="font-medium">Price</TableCell>
+                                {projects.filter(p => comparisonList.includes(p.id)).map(p => <TableCell key={p.id}>€{p.pricePerUnit}</TableCell>)}
+                            </TableRow>
+                            <TableRow>
+                                <TableCell className="font-medium">Credits/Unit</TableCell>
+                                {projects.filter(p => comparisonList.includes(p.id)).map(p => <TableCell key={p.id}>{p.creditsPerUnit}</TableCell>)}
+                            </TableRow>
+                            <TableRow>
+                                <TableCell className="font-medium">Rating</TableCell>
+                                {projects.filter(p => comparisonList.includes(p.id)).map(p => <TableCell key={p.id}><QualityBadge rating={p.qualityRating} /></TableCell>)}
+                            </TableRow>
+                            <TableRow>
+                                <TableCell className="font-medium">Location</TableCell>
+                                {projects.filter(p => comparisonList.includes(p.id)).map(p => <TableCell key={p.id}>{p.location}</TableCell>)}
+                            </TableRow>
+                            <TableRow>
+                                <TableCell className="font-medium">Verified By</TableCell>
+                                {projects.filter(p => comparisonList.includes(p.id)).map(p => <TableCell key={p.id}>{p.verifiedBy}</TableCell>)}
+                            </TableRow>
+                        </TableBody>
+                    </Table>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog open={isAiModalOpen} onOpenChange={setIsAiModalOpen}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2 text-indigo-600">
+                            <Bot className="w-6 h-6" /> AI Smart Recommendation
+                        </DialogTitle>
+                        <DialogDescription>
+                            Based on your goal to maximize Carbon Credit efficiency (ROI & Quality).
+                        </DialogDescription>
+                    </DialogHeader>
+                    {aiRecommendation && (
+                        <div className="space-y-4 py-4">
+                            <div className="p-4 border border-indigo-100 bg-indigo-50/50 rounded-lg dark:bg-indigo-900/20 dark:border-indigo-800">
+                                <div className="flex items-start gap-4">
+                                    <img src={aiRecommendation.image} alt={aiRecommendation.title} className="w-16 h-16 rounded object-cover" />
+                                    <div>
+                                        <h4 className="font-bold text-lg">{aiRecommendation.title}</h4>
+                                        <QualityBadge rating={aiRecommendation.qualityRating} />
+                                        <p className="text-sm mt-1 text-muted-foreground">{aiRecommendation.category} • {aiRecommendation.location}</p>
+                                    </div>
+                                </div>
+                                <Separator className="my-3 bg-indigo-200/50" />
+                                <div className="space-y-2 text-sm">
+                                    <div className="flex justification-between">
+                                        <span className="text-muted-foreground">Why this?</span>
+                                        <span className="font-medium ml-auto text-green-600">Best Value + High Integrity</span>
+                                    </div>
+                                    <p className="text-xs text-muted-foreground italic">
+                                        "This project offers the highest carbon credits per Euro spent ({(aiRecommendation.creditsPerUnit / aiRecommendation.pricePerUnit).toFixed(2)} credits/€) among verifiable {aiRecommendation.qualityRating}-rated projects."
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                    <DialogFooter>
+                        <Button className="w-full bg-indigo-600 hover:bg-indigo-700" onClick={() => {
+                            window.open(aiRecommendation?.url, '_blank');
+                            setIsAiModalOpen(false);
+                        }}>
+                            View Project
+                        </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
