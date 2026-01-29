@@ -575,7 +575,7 @@ export const GreenInvestment = () => {
                             <Button variant="link" onClick={() => { setPriceRange([0, 200]); setSelectedType('all'); }}>Clear Filters</Button>
                         </div>
                     ) : filteredProjects.map((project) => (
-                        <Card key={project.id} className="overflow-hidden flex flex-col hover:shadow-lg transition-all duration-300 group">
+                        <Card key={project.id} className="overflow-hidden flex flex-col hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group">
                             <div className="relative h-40 overflow-hidden">
                                 <img
                                     src={project.image}

@@ -47,7 +47,7 @@ export function AppSidebar({ activeTab, onTabChange }: AppSidebarProps) {
               onClick={() => onTabChange(item.id)}
               title={item.label}
               className={cn(
-                'w-10 h-10 rounded-lg flex items-center justify-center transition-colors',
+                'w-10 h-10 rounded-lg flex items-center justify-center transition-all active:scale-95',
                 isActive
                   ? 'bg-primary text-primary-foreground'
                   : 'text-muted-foreground hover:bg-muted hover:text-foreground'

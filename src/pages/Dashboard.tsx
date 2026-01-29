@@ -99,7 +99,9 @@ const Dashboard = () => {
 
             <main className="flex-1 p-6 overflow-auto">
                 <div className="max-w-6xl mx-auto">
-                    {renderContent()}
+                    <div key={activeTab} className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                        {renderContent()}
+                    </div>
                 </div>
             </main>
 
