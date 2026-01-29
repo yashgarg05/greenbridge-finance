@@ -49,10 +49,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Bot, Bell } from "lucide-react";
 
 
+import { projects, Project, ProjectType, QualityRating } from '@/data/projects';
+
 // --- Types ---
-// --- Types ---
-type ProjectType = 'Solar' | 'Forestry' | 'Wind' | 'Water' | 'Direct Air Capture';
-type QualityRating = 'AAA' | 'AA' | 'A' | 'B+';
 type ListingStatus = 'Pending' | 'Verified' | 'Rejected';
 
 interface UserListing {
@@ -66,122 +65,8 @@ interface UserListing {
     submittedAt: string;
 }
 
-interface Project {
-    id: string;
-    title: string;
-    description: string;
-    location: string;
-    pricePerUnit: number;
-    creditsPerUnit: number;
-    image: string;
-    category: ProjectType;
-    fundingPercentage: number;
-    verifiedBy: string;
-    qualityRating: QualityRating;
-    article6: boolean;
-    sdgGoals: number[];
-    url: string;
-}
-
 // --- Data ---
-const projects: Project[] = [
-    {
-        id: '1',
-        title: 'Sahara Solar Initiative',
-        description: 'Large-scale solar farm expansion in Northern Africa, replacing diesel generators with clean renewable energy.',
-        location: 'Morocco',
-        pricePerUnit: 25.00,
-        creditsPerUnit: 1,
-        image: '/images/marketplace/solar.png',
-        category: 'Solar',
-        fundingPercentage: 78,
-        verifiedBy: 'Gold Standard',
-        qualityRating: 'A',
-        article6: true,
-        sdgGoals: [7, 13],
-        url: 'https://en.wikipedia.org/wiki/Ouarzazate_Solar_Power_Station'
-    },
-    {
-        id: '2',
-        title: 'Amazon Reforestation Project',
-        description: 'Restoring degraded land in the Amazon basin with native species to sequester carbon and restore biodiversity.',
-        location: 'Brazil',
-        pricePerUnit: 15.00,
-        creditsPerUnit: 1.2,
-        image: '/images/marketplace/reforestation.png',
-        category: 'Forestry',
-        fundingPercentage: 45,
-        verifiedBy: 'Verra',
-        qualityRating: 'AA',
-        article6: false,
-        sdgGoals: [13, 15],
-        url: 'https://onetreeplanted.org/collections/latin-america/products/amazon-rainforest'
-    },
-    {
-        id: '3',
-        title: 'North Sea Wind Expansion',
-        description: 'Offshore wind farm development providing clean grid energy to Northern Europe.',
-        location: 'Netherlands',
-        pricePerUnit: 40.00,
-        creditsPerUnit: 2,
-        image: '/images/marketplace/wind.png',
-        category: 'Wind',
-        fundingPercentage: 92,
-        verifiedBy: 'Gold Standard',
-        qualityRating: 'A',
-        article6: true,
-        sdgGoals: [7, 9, 13],
-        url: 'https://northseawindpowerhub.eu/'
-    },
-    {
-        id: '4',
-        title: 'Clean Water Access Program',
-        description: 'Solar-powered water filtration systems reducing the need for wood-burning boiling in rural communities.',
-        location: 'Kenya',
-        pricePerUnit: 12.00,
-        creditsPerUnit: 0.8,
-        image: '/images/marketplace/water.png',
-        category: 'Water',
-        fundingPercentage: 60,
-        verifiedBy: 'UN CDM',
-        qualityRating: 'A',
-        article6: false,
-        sdgGoals: [6, 13],
-        url: 'https://www.charitywater.org/our-work/where-we-work/kenya'
-    },
-    {
-        id: '5',
-        title: 'AtmosClear Direct Air Capture',
-        description: 'Cutting-edge DAC facility permanently removing CO2 from the atmosphere and mineralizing it underground.',
-        location: 'Iceland',
-        pricePerUnit: 150.00,
-        creditsPerUnit: 1,
-        image: '/images/marketplace/dac.png',
-        category: 'Direct Air Capture',
-        fundingPercentage: 30,
-        verifiedBy: 'Puro.earth',
-        qualityRating: 'AAA',
-        article6: true,
-        sdgGoals: [9, 13],
-        url: 'https://climeworks.com/'
-    },
-    {
-        id: '6',
-        title: 'Gujarat Clean Water Project',
-        description: 'Community-led water purification and conservation initiative in rural Gujarat, improving health and reducing boiling-related emissions.',
-        location: 'India',
-        pricePerUnit: 18.00,
-        creditsPerUnit: 1.5,
-        image: '/images/marketplace/water.png',
-        category: 'Water',
-        fundingPercentage: 65,
-        verifiedBy: 'Gold Standard',
-        qualityRating: 'AA',
-        article6: true,
-        sdgGoals: [6, 3, 13],
-        url: 'https://en.wikipedia.org/wiki/Gujarat'
-    }
-];
+// Imported from @/data/projects
 
 // --- Components ---
 
@@ -247,7 +132,7 @@ const QualityBadge = ({ rating }: { rating: QualityRating }) => {
     );
 };
 
-export const GreenInvestment = () => {
+export const GreenInvestment = ({ initialOpenListing = false }: { initialOpenListing?: boolean }) => {
     // User Listings State
     const [myListings, setMyListings] = useState<UserListing[]>(() => {
         const saved = localStorage.getItem('user_listings');
@@ -290,10 +175,16 @@ export const GreenInvestment = () => {
     const [smartMix, setSmartMix] = useState<Project[] | null>(null);
     const [mixType, setMixType] = useState<'standard' | 'balanced'>('standard');
 
-
-
     const { toast } = useToast();
+
+    // State
     const [isListingOpen, setIsListingOpen] = useState(false);
+
+    useEffect(() => {
+        if (initialOpenListing) {
+            setIsListingOpen(true);
+        }
+    }, [initialOpenListing]);
     const [listingForm, setListingForm] = useState({
         title: '',
         description: '',

@@ -22,6 +22,8 @@ const Dashboard = () => {
     useEffect(() => {
         if (location.state?.activeTab) {
             setActiveTab(location.state.activeTab);
+            // Clear state to prevent loop/re-trigger
+            window.history.replaceState({}, document.title);
         }
     }, [location.state]);
 
@@ -70,7 +72,7 @@ const Dashboard = () => {
             case 'compliance':
                 return <ComplianceControlPanel />;
             case 'invest':
-                return <GreenInvestment />;
+                return <GreenInvestment initialOpenListing={location.state?.openListingModal} />;
             case 'calculator':
                 return <CBAMCalculator />;
             case 'documents':

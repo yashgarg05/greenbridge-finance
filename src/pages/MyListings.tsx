@@ -56,7 +56,7 @@ const MyListings = () => {
                                 Track the status of your submitted projects.
                             </p>
                         </div>
-                        <Button onClick={() => navigate('/dashboard')} className="gap-2">
+                        <Button onClick={() => navigate('/dashboard', { state: { activeTab: 'invest', openListingModal: true } })} className="gap-2">
                             <Plus className="w-4 h-4" /> Submit New Project
                         </Button>
                     </div>

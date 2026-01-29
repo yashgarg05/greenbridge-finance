@@ -18,7 +18,10 @@ export const OrderEntryForm = () => {
         const p = parseFloat(price);
         const q = parseFloat(quantity);
 
-        if (!p || !q) return;
+        if (!p || !q || p <= 0 || q <= 0) {
+            toast({ title: "Invalid Input", description: "Price and Quantity must be positive.", variant: "destructive" });
+            return;
+        }
 
         exchangeEngine.placeOrder({
             side: side === 'buy' ? 'BUY' : 'SELL',

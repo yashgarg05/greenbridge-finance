@@ -26,7 +26,7 @@ export const OrderBookPanel = () => {
             <CardHeader className="py-3 px-4 border-b">
                 <CardTitle className="text-sm font-medium flex justify-between">
                     <span>Order Book</span>
-                    <span className="text-muted-foreground text-xs font-normal">Spread: {(state.asks[0]?.price - state.bids[0]?.price).toFixed(2)}</span>
+                    <span className="text-muted-foreground text-xs font-normal">Spread: {((state.asks[0]?.price || 0) - (state.bids[0]?.price || 0)).toFixed(2)}</span>
                 </CardTitle>
             </CardHeader>
             <CardContent className="p-0 flex-1 overflow-hidden flex flex-col">
