@@ -10,6 +10,7 @@ const sections = [
         image: "/images/logistics_trade.png",
         alt: "Global Trade and Logistics",
         reverse: false,
+        link: "https://taxation-customs.ec.europa.eu/carbon-border-adjustment-mechanism_en"
     },
     {
         title: "Carbon Liability Management",
@@ -17,6 +18,7 @@ const sections = [
         image: "/images/industrial_finance.png",
         alt: "Industrial Finance Data",
         reverse: true,
+        link: "https://finance.ec.europa.eu/sustainable-finance_en"
     },
     {
         title: "Sustainable Future",
@@ -24,6 +26,7 @@ const sections = [
         image: "/images/sustainable_industry.png",
         alt: "Sustainable Industry",
         reverse: false,
+        link: "https://sdgs.un.org/goals"
     },
 ];
 
@@ -48,11 +51,13 @@ export const ContentSections = () => {
                                     </p>
                                 </ScrollReveal>
                                 <ScrollReveal delay={300}>
-                                    <Link to="/dashboard">
-                                        <Button variant="outline" className="group">
-                                            Learn more <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-                                        </Button>
-                                    </Link>
+                                    <Button
+                                        variant="outline"
+                                        className="group"
+                                        onClick={() => window.open(section.link, '_blank')}
+                                    >
+                                        Learn more <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                                    </Button>
                                 </ScrollReveal>
                             </div>
 
