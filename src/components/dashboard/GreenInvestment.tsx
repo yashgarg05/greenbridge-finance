@@ -45,7 +45,7 @@ import { Textarea } from "@/components/ui/textarea"; // Assuming Textarea exists
 // "flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
 import { Checkbox } from "@/components/ui/checkbox";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Bot } from "lucide-react";
+import { Bot, Bell } from "lucide-react";
 
 
 // --- Types ---
@@ -238,6 +238,80 @@ export const GreenInvestment = () => {
     const [aiRecommendation, setAiRecommendation] = useState<Project | null>(null);
     const [isAiModalOpen, setIsAiModalOpen] = useState(false);
     const [isAiLoading, setIsAiLoading] = useState(false);
+
+    // --- Investment Modal State ---
+    const [investProject, setInvestProject] = useState<Project | null>(null);
+    const [isInvestOpen, setIsInvestOpen] = useState(false);
+    const [investCredits, setInvestCredits] = useState<string>('');
+    const [investAmount, setInvestAmount] = useState<string>('');
+    const [isNegotiating, setIsNegotiating] = useState(false);
+    const [negotiationPrice, setNegotiationPrice] = useState<string>('');
+    const [negotiationMessage, setNegotiationMessage] = useState<string>('');
+
+    // --- Price Alert State ---
+    const [subscribedProjects, setSubscribedProjects] = useState<string[]>([]);
+
+    const toggleSubscription = (e: React.MouseEvent, project: Project) => {
+        e.stopPropagation(); // Prevent card click if necessary
+        if (subscribedProjects.includes(project.id)) {
+            setSubscribedProjects(prev => prev.filter(id => id !== project.id));
+            toast({
+                title: "Unsubscribed",
+                description: `You will no longer receive price alerts for ${project.title}.`,
+            });
+        } else {
+            setSubscribedProjects(prev => [...prev, project.id]);
+            toast({
+                title: "Subscribed to Price Alerts",
+                description: `We'll notify you when the price drops for ${project.title}.`,
+            });
+        }
+    };
+
+    const openInvestModal = (project: Project) => {
+        setInvestProject(project);
+        setInvestCredits('10'); // Default
+        setInvestAmount((10 * project.pricePerUnit).toFixed(2));
+        setIsNegotiating(false);
+        setNegotiationPrice('');
+        setNegotiationMessage('');
+        setIsInvestOpen(true);
+    };
+
+    const handleCreditChange = (val: string) => {
+        setInvestCredits(val);
+        if (investProject && val) {
+            const num = parseFloat(val);
+            if (!isNaN(num)) {
+                setInvestAmount((num * investProject.pricePerUnit).toFixed(2));
+            }
+        }
+    };
+
+    const handleAmountChange = (val: string) => {
+        setInvestAmount(val);
+        if (investProject && val) {
+            const num = parseFloat(val);
+            if (!isNaN(num)) {
+                setInvestCredits((num / investProject.pricePerUnit).toFixed(2));
+            }
+        }
+    };
+
+    const handleInvestSubmit = () => {
+        if (isNegotiating) {
+            toast({
+                title: "Negotiation Request Sent",
+                description: `We have sent your offer of €${negotiationPrice}/unit to the seller. We will notify you via email shortly.`,
+            });
+        } else {
+            toast({
+                title: "Investment Processed Successfully",
+                description: `You have purchased ${investCredits} tonnes of carbon credits from ${investProject?.title}.`,
+            });
+        }
+        setIsInvestOpen(false);
+    };
 
     const toggleComparison = (id: string, checked: boolean) => {
         if (checked) {
@@ -567,8 +641,16 @@ export const GreenInvestment = () => {
                                 </div>
                             </CardContent>
 
-                            <CardFooter className="px-4 pb-4 pt-0">
-                                <Button size="sm" className="w-full" onClick={() => window.open(project.url, '_blank')}>
+                            <CardFooter className="px-4 pb-4 pt-0 flex gap-2">
+                                <Button
+                                    size="icon"
+                                    variant="outline"
+                                    className={`shrink-0 ${subscribedProjects.includes(project.id) ? "bg-primary text-primary-foreground hover:bg-primary/90" : "text-muted-foreground"}`}
+                                    onClick={(e) => toggleSubscription(e, project)}
+                                >
+                                    <Bell className={`w-4 h-4 ${subscribedProjects.includes(project.id) ? "fill-current" : ""}`} />
+                                </Button>
+                                <Button size="sm" className="w-full" onClick={() => openInvestModal(project)}>
                                     Invest Now <ArrowRight className="w-3 h-3 ml-1" />
                                 </Button>
                             </CardFooter>
@@ -735,6 +817,92 @@ export const GreenInvestment = () => {
                             setIsAiModalOpen(false);
                         }}>
                             View Project
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog open={isInvestOpen} onOpenChange={setIsInvestOpen}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>Invest in {investProject?.title}</DialogTitle>
+                        <DialogDescription>
+                            Configure your investment or request a custom negotiation.
+                            <br />
+                            <span className="font-semibold text-green-600">Current Price: €{investProject?.pricePerUnit.toFixed(2)} / Tonne</span>
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="space-y-4 py-2">
+                        <div className="flex items-center space-x-2 border p-3 rounded-md bg-muted/20">
+                            <Checkbox
+                                id="negotiate"
+                                checked={isNegotiating}
+                                onCheckedChange={(checked) => setIsNegotiating(checked as boolean)}
+                            />
+                            <label
+                                htmlFor="negotiate"
+                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                            >
+                                Request Negotiation (Bulk / Custom Price)
+                            </label>
+                        </div>
+
+                        {!isNegotiating ? (
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label>Credits (Tonnes)</Label>
+                                    <Input
+                                        type="number"
+                                        value={investCredits}
+                                        onChange={(e) => handleCreditChange(e.target.value)}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Total Amount (€)</Label>
+                                    <Input
+                                        type="number"
+                                        value={investAmount}
+                                        onChange={(e) => handleAmountChange(e.target.value)}
+                                    />
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="space-y-4 animate-in fade-in slide-in-from-top-2">
+                                <div className="space-y-2">
+                                    <Label>Target Price per Unit (€)</Label>
+                                    <Input
+                                        type="number"
+                                        placeholder={`Current: €${investProject?.pricePerUnit}`}
+                                        value={negotiationPrice}
+                                        onChange={(e) => setNegotiationPrice(e.target.value)}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Quantity (Tonnes)</Label>
+                                    <Input
+                                        type="number"
+                                        placeholder="e.g. 500"
+                                        value={investCredits}
+                                        onChange={(e) => setInvestCredits(e.target.value)}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Message to Seller</Label>
+                                    <Textarea
+                                        placeholder="We are interested in a long-term offtake agreement..."
+                                        value={negotiationMessage}
+                                        onChange={(e) => setNegotiationMessage(e.target.value)}
+                                    />
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsInvestOpen(false)}>Cancel</Button>
+                        <Button onClick={handleInvestSubmit} className={isNegotiating ? "bg-amber-600 hover:bg-amber-700" : ""}>
+                            {isNegotiating ? "Submit Proposal" : "Proceed to Payment"}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
