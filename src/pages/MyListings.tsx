@@ -13,6 +13,9 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { AppSidebar } from "@/components/AppSidebar";
+import { CreateListingDialog } from "@/components/CreateListingDialog";
+import { useQuery } from "@tanstack/react-query";
+import { mockApi } from "@/services/mockApi";
 
 interface Listing {
     id: string;
@@ -25,15 +28,17 @@ interface Listing {
 }
 
 const MyListings = () => {
-    const [listings, setListings] = useState<Listing[]>([]);
     const navigate = useNavigate();
 
-    useEffect(() => {
-        const savedListings = localStorage.getItem('user_listings');
-        if (savedListings) {
-            setListings(JSON.parse(savedListings));
-        }
-    }, []);
+    const { data: listings, isLoading } = useQuery({
+        queryKey: ['listings'],
+        queryFn: mockApi.getListings
+    });
+
+    if (isLoading) return <div>Loading...</div>;
+
+    // Use listings from API or empty array
+    const displayListings = listings || [];
 
     const [activeTab, setActiveTab] = useState('listings'); // Dummy state for sidebar
 
@@ -56,9 +61,7 @@ const MyListings = () => {
                                 Track the status of your submitted projects.
                             </p>
                         </div>
-                        <Button onClick={() => navigate('/dashboard')} className="gap-2">
-                            <Plus className="w-4 h-4" /> Submit New Project
-                        </Button>
+                        <CreateListingDialog />
                     </div>
 
                     <Card>
@@ -66,7 +69,7 @@ const MyListings = () => {
                             <CardTitle>Submitted Projects</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            {listings.length === 0 ? (
+                            {displayListings.length === 0 ? (
                                 <div className="text-center py-12 text-muted-foreground">
                                     <p>You haven't listed any projects yet.</p>
                                     <Button variant="link" onClick={() => navigate('/dashboard')} className="mt-2">
@@ -85,13 +88,13 @@ const MyListings = () => {
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                        {listings.map((listing) => (
+                                        {displayListings.map((listing) => (
                                             <TableRow key={listing.id}>
                                                 <TableCell className="font-medium">{listing.title}</TableCell>
                                                 <TableCell>{listing.category}</TableCell>
                                                 <TableCell>
                                                     <div className="flex flex-col text-xs">
-                                                        <span>€{listing.price}</span>
+                                                        <span>₹{listing.price}</span>
                                                         <span className="text-muted-foreground">{listing.credits} Credits</span>
                                                     </div>
                                                 </TableCell>

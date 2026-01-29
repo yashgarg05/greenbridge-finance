@@ -13,7 +13,15 @@ import { FeatureShortcuts } from '@/components/dashboard/FeatureShortcuts';
 import { SettingsPanel } from '@/components/dashboard/SettingsPanel';
 import { ChatSupport } from '@/components/dashboard/ChatSupport';
 
+import { StatsOverview } from '@/components/dashboard/StatsOverview';
+import { useQuery } from '@tanstack/react-query';
+import { mockApi } from '@/services/mockApi';
+
 const Dashboard = () => {
+    const { data: stats, isLoading } = useQuery({
+        queryKey: ['dashboardStats'],
+        queryFn: mockApi.getDashboardStats
+    });
     const location = useLocation();
     const [activeTab, setActiveTab] = useState(location.state?.activeTab || 'overview');
     const navigate = useNavigate();
@@ -82,6 +90,9 @@ const Dashboard = () => {
                             <p className="text-muted-foreground">CBAM Compliance Overview & Financial Projections</p>
                         </div>
 
+                        {/* Stats Overview */}
+                        <StatsOverview stats={stats} isLoading={isLoading} />
+
                         {/* Main Layout */}
                         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                             {/* Card 1: Verified Credits Info */}
@@ -106,7 +117,7 @@ const Dashboard = () => {
     };
 
     return (
-        <div className="min-h-screen flex bg-background">
+        <div className="min-h-screen flex bg-transparent">
             <AppSidebar activeTab={activeTab} onTabChange={handleTabChange} />
 
             <main className="flex-1 p-6 overflow-auto">
