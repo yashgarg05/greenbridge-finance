@@ -1,4 +1,4 @@
-import { Home, Calculator, ShoppingCart, FileText, Moon, Sun, Sprout, ShieldCheck, Trees } from 'lucide-react';
+import { Home, Calculator, ShoppingCart, FileText, Moon, Sun, Sprout, ShieldCheck, Trees, BookOpen } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useEffect, useState } from 'react';
 
@@ -12,6 +12,7 @@ const navItems = [
   { id: 'invest', icon: Sprout, label: 'Invest' },
   { id: 'compliance', icon: ShieldCheck, label: 'Compliance' },
   { id: 'calculator', icon: Calculator, label: 'Calculator' },
+  { id: 'methodology', icon: BookOpen, label: 'Methodology' },
   { id: 'documents', icon: FileText, label: 'Docs' },
 ];
 

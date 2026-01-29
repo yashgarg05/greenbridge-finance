@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Bot, Sparkles, PhoneOff, Mic, Volume2 } from 'lucide-react';
 import { AppSidebar } from '@/components/AppSidebar';
 import { CBAMCalculator } from '@/components/CBAMCalculator';
@@ -11,6 +12,15 @@ import { VerifiedCreditsInfo } from '@/components/dashboard/VerifiedCreditsInfo'
 
 const Dashboard = () => {
     const [activeTab, setActiveTab] = useState('overview');
+    const navigate = useNavigate();
+
+    const handleTabChange = (tab: string) => {
+        if (tab === 'methodology') {
+            navigate('/methodology');
+            return;
+        }
+        setActiveTab(tab);
+    };
 
     // Call Simulation State
     const [isCallOpen, setIsCallOpen] = useState(false);
@@ -79,7 +89,7 @@ const Dashboard = () => {
 
     return (
         <div className="min-h-screen flex bg-background">
-            <AppSidebar activeTab={activeTab} onTabChange={setActiveTab} />
+            <AppSidebar activeTab={activeTab} onTabChange={handleTabChange} />
 
             <main className="flex-1 p-6 overflow-auto">
                 <div className="max-w-6xl mx-auto">
