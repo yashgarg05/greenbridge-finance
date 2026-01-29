@@ -1,4 +1,4 @@
-import { Home, Calculator, ShoppingCart, FileText, Sprout, ShieldCheck, Trees, BookOpen, Settings, ListChecks } from 'lucide-react';
+import { Home, Calculator, ShoppingCart, FileText, Sprout, ShieldCheck, Trees, BookOpen, Settings, ListChecks, TrendingUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
@@ -12,6 +12,7 @@ const navItems = [
   { id: 'overview', icon: Home, label: 'Home' },
   { id: 'invest', icon: Sprout, label: 'Invest' },
   { id: 'listings', icon: ListChecks, label: 'My Listings' },
+  { id: 'exchange', icon: TrendingUp, label: 'CCX Exchange' },
   { id: 'compliance', icon: ShieldCheck, label: 'Compliance' },
   { id: 'calculator', icon: Calculator, label: 'Calculator' },
   { id: 'documents', icon: FileText, label: 'Docs' },

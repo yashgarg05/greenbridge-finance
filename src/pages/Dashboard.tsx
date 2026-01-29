@@ -34,6 +34,10 @@ const Dashboard = () => {
             navigate('/my-listings');
             return;
         }
+        if (tab === 'exchange') {
+            navigate('/exchange');
+            return;
+        }
         setActiveTab(tab);
     };
 

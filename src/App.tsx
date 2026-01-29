@@ -11,6 +11,7 @@ import Signup from "./pages/Signup";
 import Solutions from "./pages/Solutions";
 import Methodology from "./pages/Methodology";
 import MyListings from "./pages/MyListings";
+import Exchange from "./pages/Exchange";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +29,7 @@ const App = () => (
           <Route path="/solutions" element={<Solutions />} />
           <Route path="/methodology" element={<Methodology />} />
           <Route path="/my-listings" element={<MyListings />} />
+          <Route path="/exchange" element={<Exchange />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
