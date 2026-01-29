@@ -577,7 +577,7 @@ export const GreenInvestment = () => {
         <div className="space-y-6">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
                 <div>
-                    <h2 className="text-2xl font-bold tracking-tight">Carbon Credit Marketplace</h2>
+                    <h2 className="text-2xl font-bold tracking-tight">Green Credit Marketplace</h2>
                     <p className="text-muted-foreground">Advanced portfolio management for verified ecological credits.</p>
                 </div>
                 <div className="flex gap-2">
