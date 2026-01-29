@@ -1,6 +1,6 @@
-import { Home, Calculator, ShoppingCart, FileText, Moon, Sun, Sprout, ShieldCheck, Trees, BookOpen, Settings } from 'lucide-react';
+import { Home, Calculator, ShoppingCart, FileText, Sprout, ShieldCheck, Trees, BookOpen, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 interface AppSidebarProps {
@@ -18,30 +18,16 @@ const navItems = [
 ];
 
 export function AppSidebar({ activeTab, onTabChange }: AppSidebarProps) {
-  const [isDark, setIsDark] = useState(false);
-
   useEffect(() => {
     // Check for saved preference or system preference
     const saved = localStorage.getItem('theme');
     if (saved === 'dark') {
       document.documentElement.classList.add('dark');
-      setIsDark(true);
     }
   }, []);
 
-  const toggleTheme = () => {
-    setIsDark(!isDark);
-    if (isDark) {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    } else {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    }
-  };
-
   return (
-    <aside className="w-16 border-r border-border bg-card flex flex-col items-center py-4 shrink-0">
+    <aside className="w-16 border-r border-border bg-card flex flex-col items-center py-4 shrink-0 sticky top-0 h-screen z-40">
       {/* Logo */}
       <Link to="/" className="w-10 h-10 flex items-center justify-center mb-8">
         <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-8 w-8">
@@ -72,15 +58,6 @@ export function AppSidebar({ activeTab, onTabChange }: AppSidebarProps) {
           );
         })}
       </nav>
-
-      {/* Theme Toggle */}
-      <button
-        onClick={toggleTheme}
-        title={isDark ? 'Light mode' : 'Dark mode'}
-        className="w-10 h-10 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-      >
-        {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-      </button>
     </aside>
   );
 }

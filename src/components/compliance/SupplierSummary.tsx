@@ -2,6 +2,26 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Users, CheckCircle2, AlertCircle, Clock } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
+import { useState } from 'react';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
 
 export function SupplierSummary() {
     const stats = {
@@ -12,6 +32,36 @@ export function SupplierSummary() {
     };
 
     const verificationProgress = Math.round((stats.verified / stats.total) * 100);
+
+    // --- Request Data Logic ---
+    const { toast } = useToast();
+    const [isRequestOpen, setIsRequestOpen] = useState(false);
+    const [requestForm, setRequestForm] = useState({
+        supplier: '',
+        type: '',
+        message: ''
+    });
+
+    const handleRequestSubmit = () => {
+        if (!requestForm.supplier || !requestForm.type) {
+            toast({
+                title: "Missing Fields",
+                description: "Please select a supplier and data type.",
+                variant: "destructive"
+            });
+            return;
+        }
+
+        // Simulate API call
+        setTimeout(() => {
+            toast({
+                title: "Request Sent Successfully",
+                description: `We've asked ${requestForm.supplier} for ${requestForm.type}.`,
+            });
+            setIsRequestOpen(false);
+            setRequestForm({ supplier: '', type: '', message: '' });
+        }, 500);
+    };
 
     return (
         <Card className="data-card h-full">
@@ -53,9 +103,75 @@ export function SupplierSummary() {
                     </div>
                 </div>
 
-                <Button variant="outline" size="sm" className="w-full text-xs">
-                    Request Missing Data
-                </Button>
+                <Dialog open={isRequestOpen} onOpenChange={setIsRequestOpen}>
+                    <DialogTrigger asChild>
+                        <Button variant="outline" size="sm" className="w-full text-xs">
+                            Request Missing Data
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[425px]">
+                        <DialogHeader>
+                            <DialogTitle>Request Supplier Data</DialogTitle>
+                            <DialogDescription>
+                                Send a formal request for missing compliance documentation.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <div className="grid gap-4 py-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="supplier" className="text-right">
+                                    Supplier
+                                </Label>
+                                <Select
+                                    value={requestForm.supplier}
+                                    onValueChange={(val) => setRequestForm({ ...requestForm, supplier: val })}
+                                >
+                                    <SelectTrigger className="w-full">
+                                        <SelectValue placeholder="Select Supplier" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="Global Steel Corp">Global Steel Corp</SelectItem>
+                                        <SelectItem value="EcoLogistics Ltd">EcoLogistics Ltd</SelectItem>
+                                        <SelectItem value="Nordic Aluminum">Nordic Aluminum</SelectItem>
+                                        <SelectItem value="Polymers Int.">Polymers Int.</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="dtype" className="text-right">
+                                    Data Type
+                                </Label>
+                                <Select
+                                    value={requestForm.type}
+                                    onValueChange={(val) => setRequestForm({ ...requestForm, type: val })}
+                                >
+                                    <SelectTrigger className="w-full">
+                                        <SelectValue placeholder="Select Data Needed" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="Q4 Emissions Report">Q4 Emissions Report</SelectItem>
+                                        <SelectItem value="ISO 14064 Certification">ISO 14064 Certification</SelectItem>
+                                        <SelectItem value="Production Volume Data">Production Volume Data</SelectItem>
+                                        <SelectItem value="Grid Mix Evidence">Grid Mix Evidence</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="message" className="text-right">
+                                    Message (Optional)
+                                </Label>
+                                <Textarea
+                                    id="message"
+                                    placeholder="Please provide this by EOM..."
+                                    value={requestForm.message}
+                                    onChange={(e) => setRequestForm({ ...requestForm, message: e.target.value })}
+                                />
+                            </div>
+                        </div>
+                        <DialogFooter>
+                            <Button type="submit" onClick={handleRequestSubmit}>Send Request</Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
             </CardContent>
         </Card>
     );
