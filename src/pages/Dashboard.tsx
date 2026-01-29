@@ -1,10 +1,7 @@
 import { useState } from 'react';
 import { AppSidebar } from '@/components/AppSidebar';
 import { CarbonDebtCard } from '@/components/CarbonDebtCard';
-import { VerifiedSupplyGrid } from '@/components/VerifiedSupplyGrid';
-import { GCPStatusWidget } from '@/components/GCPStatusWidget';
 import { CBAMCalculator } from '@/components/CBAMCalculator';
-import { CreditMarketplace } from '@/components/CreditMarketplace';
 import { DocumentVault } from '@/components/DocumentVault';
 
 const Dashboard = () => {
@@ -15,8 +12,6 @@ const Dashboard = () => {
         switch (activeTab) {
             case 'calculator':
                 return <CBAMCalculator />;
-            case 'marketplace':
-                return <CreditMarketplace />;
             case 'documents':
                 return <DocumentVault />;
             default:
@@ -29,16 +24,10 @@ const Dashboard = () => {
                         </div>
 
                         {/* Main Grid */}
-                        <div className="grid gap-6 lg:grid-cols-3">
+                        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                             {/* Left Column */}
-                            <div className="space-y-6">
+                            <div className="space-y-6 lg:col-span-1">
                                 <CarbonDebtCard tonnes={tonnes} onTonnesChange={setTonnes} />
-                                <GCPStatusWidget />
-                            </div>
-
-                            {/* Right Column - Table */}
-                            <div className="lg:col-span-2">
-                                <VerifiedSupplyGrid />
                             </div>
                         </div>
                     </div>

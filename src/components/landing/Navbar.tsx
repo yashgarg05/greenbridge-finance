@@ -1,12 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { TreeLogo } from "@/components/ui/TreeLogo";
 
 export const Navbar = () => {
     return (
-        <nav className="fixed top-0 w-full z-50 bg-background/80 backdrop-blur-md border-b border-white/10">
+        <nav className="fixed top-0 w-full z-50 bg-background/80 backdrop-blur-md border-b border-border/10">
             <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                    <div className="h-6 w-6 bg-primary rounded-md" />
+                    <TreeLogo />
                     <span className="font-semibold text-lg tracking-tight">GreenBridge</span>
                 </div>
 

@@ -16,32 +16,32 @@
     --popover: 0 0% 100%;
     --popover-foreground: 220 15% 15%;
 
-    --primary: 155 65% 42%;
-    /* Refined Fintech Emerald - more vibrant but professional */
+    --primary: 0 0% 9%;
+    /* Black */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 220 10% 96%;
-    /* Very subtle cool gray */
-    --secondary-foreground: 220 15% 15%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 9%;
 
-    --muted: 220 10% 96%;
-    --muted-foreground: 220 10% 55%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
 
-    --accent: 220 10% 96%;
-    --accent-foreground: 220 15% 15%;
+    --accent: 0 0% 96%;
+    --accent-foreground: 0 0% 9%;
 
     --destructive: 0 85% 60%;
     --destructive-foreground: 0 0% 100%;
 
     --success: 155 65% 42%;
+    /* Keep success color for indicators */
     --success-foreground: 0 0% 100%;
 
     --warning: 40 90% 60%;
     --warning-foreground: 0 0% 100%;
 
-    --border: 220 15% 90%;
-    --input: 220 15% 90%;
-    --ring: 155 65% 42%;
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 0 0% 9%;
 
     --radius: 0.75rem;
     /* Increased radius for modern feel */

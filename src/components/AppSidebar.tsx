@@ -10,7 +10,6 @@ interface AppSidebarProps {
 const navItems = [
   { id: 'overview', icon: Home, label: 'Home' },
   { id: 'calculator', icon: Calculator, label: 'Calculator' },
-  { id: 'marketplace', icon: ShoppingCart, label: 'Credits' },
   { id: 'documents', icon: FileText, label: 'Docs' },
 ];
 

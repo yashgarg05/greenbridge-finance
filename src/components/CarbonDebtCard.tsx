@@ -20,8 +20,7 @@ export function CarbonDebtCard({ tonnes, onTonnesChange }: CarbonDebtCardProps) 
   return (
     <div className="data-card space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold">Carbon Debt</h2>
-        <span className="text-xs text-muted-foreground">Real-time</span>
+        <h2 className="text-sm font-semibold">Net Carbon Debt</h2>
       </div>
 
       <div className="space-y-2">
