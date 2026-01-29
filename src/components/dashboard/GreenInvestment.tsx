@@ -150,6 +150,22 @@ const projects: Project[] = [
         article6: true,
         sdgGoals: [9, 13],
         url: 'https://climeworks.com/'
+    },
+    {
+        id: '6',
+        title: 'Gujarat Clean Water Project',
+        description: 'Community-led water purification and conservation initiative in rural Gujarat, improving health and reducing boiling-related emissions.',
+        location: 'India',
+        pricePerUnit: 18.00,
+        creditsPerUnit: 1.5,
+        image: '/images/marketplace/water.png',
+        category: 'Water',
+        fundingPercentage: 65,
+        verifiedBy: 'Gold Standard',
+        qualityRating: 'AA',
+        article6: true,
+        sdgGoals: [6, 3, 13],
+        url: 'https://en.wikipedia.org/wiki/Gujarat'
     }
 ];
 
@@ -226,6 +242,7 @@ export const GreenInvestment = () => {
     const [emissionsInput, setEmissionsInput] = useState<string>('');
     const [budgetInput, setBudgetInput] = useState<string>('');
     const [smartMix, setSmartMix] = useState<Project[] | null>(null);
+    const [mixType, setMixType] = useState<'standard' | 'balanced'>('standard');
 
     const { toast } = useToast();
     const [isListingOpen, setIsListingOpen] = useState(false);
@@ -413,6 +430,7 @@ export const GreenInvestment = () => {
 
     // Smart Mix Logic
     const generateSmartMix = () => {
+        setMixType('standard');
         const emissions = parseFloat(emissionsInput) || 0;
         const budget = parseFloat(budgetInput) || 0;
 
@@ -448,6 +466,50 @@ export const GreenInvestment = () => {
         }
 
         setSmartMix(mix);
+    };
+
+    const handleAutoAllocate = () => {
+        const budget = parseFloat(budgetInput);
+        if (!budget || budget <= 0) {
+            toast({
+                title: "Budget Required",
+                description: "Please enter a valid budget to auto-allocate.",
+                variant: "destructive"
+            });
+            return;
+        }
+
+        // 70% Budget for Low Cost Compliance
+        const budgetLowCost = budget * 0.7;
+        // 30% Budget for India Impact
+        const budgetImpact = budget * 0.3;
+
+        const mix: Project[] = [];
+
+        // 1. Find India Project (Impact)
+        const indiaProject = projects.find(p => p.location === 'India');
+        if (indiaProject) mix.push(indiaProject);
+        else {
+            // Fallback to Water if no India specific
+            const waterProject = projects.find(p => p.category === 'Water');
+            if (waterProject) mix.push(waterProject);
+        }
+
+        // 2. Find Low Cost Project (Compliance)
+        // Prefer price < 20
+        const lowCostProject = projects.find(p => p.pricePerUnit < 20 && p.location !== 'India');
+        if (lowCostProject) mix.push(lowCostProject);
+        else {
+            const cheapest = [...projects].sort((a, b) => a.pricePerUnit - b.pricePerUnit)[0];
+            if (cheapest && !mix.includes(cheapest)) mix.push(cheapest);
+        }
+
+        setMixType('balanced');
+        setSmartMix(mix);
+        toast({
+            title: "Portfolio Auto-Allocated",
+            description: "Generated a 70% Compliance / 30% Impact split.",
+        });
     };
 
     return (
@@ -514,18 +576,34 @@ export const GreenInvestment = () => {
                                     onChange={(e) => setBudgetInput(e.target.value)}
                                 />
                             </div>
-                            <Button size="sm" className="w-full mt-2" onClick={generateSmartMix}>
-                                Generate Mix
-                            </Button>
+                            <div className="flex flex-col gap-2 mt-2">
+                                <Button size="sm" className="w-full" onClick={generateSmartMix}>
+                                    Generate Standard Mix
+                                </Button>
+                                <Button size="sm" variant="secondary" className="w-full bg-green-100 text-green-800 hover:bg-green-200 dark:bg-green-900/40 dark:text-green-300" onClick={handleAutoAllocate}>
+                                    Auto-Allocate (70/30)
+                                </Button>
+                            </div>
 
                             {smartMix && (
                                 <div className="mt-4 pt-4 border-t border-border/50 animate-in fade-in slide-in-from-top-2">
-                                    <p className="text-xs font-semibold mb-2 text-muted-foreground">Recommended Projects:</p>
+                                    <div className="flex justify-between items-center mb-2">
+                                        <p className="text-xs font-semibold text-muted-foreground">Recommended Projects:</p>
+                                        {mixType === 'balanced' && (
+                                            <Badge variant="outline" className="text-[10px] h-5 px-1 bg-green-50 text-green-700 border-green-200">Balanced</Badge>
+                                        )}
+                                    </div>
                                     <ul className="space-y-2">
                                         {smartMix.map(p => (
                                             <li key={p.id} className="text-xs flex items-center gap-2">
                                                 <Badge variant="outline" className="h-5 px-1">{p.category}</Badge>
-                                                <span className="truncate">{p.title}</span>
+                                                <span className="truncate flex-1">{p.title}</span>
+                                                {mixType === 'balanced' && p.location === 'India' && (
+                                                    <span className="text-[10px] text-green-600 font-bold">30%</span>
+                                                )}
+                                                {mixType === 'balanced' && p.location !== 'India' && (
+                                                    <span className="text-[10px] text-blue-600 font-bold">70%</span>
+                                                )}
                                             </li>
                                         ))}
                                     </ul>
