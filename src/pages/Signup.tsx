@@ -2,37 +2,51 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Apple } from "lucide-react";
+import { Github, Apple } from "lucide-react";
 
-const Login = () => {
+const Signup = () => {
     return (
         <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 relative overflow-hidden">
             {/* Background Pattern */}
             <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" />
             <div className="absolute left-0 right-0 top-0 -z-10 m-auto h-[310px] w-[310px] rounded-full bg-primary/20 opacity-20 blur-[100px]" />
 
-            <div className="w-full max-w-[400px] mx-auto z-10">
+            <div className="w-full max-w-[450px] mx-auto z-10">
                 <div className="flex flex-col items-center mb-8">
                     <Link to="/" className="flex items-center gap-2 mb-4 hover:opacity-80 transition-opacity">
                         <span className="font-semibold text-lg tracking-tight">GreenBridge</span>
                     </Link>
-                    <h1 className="text-2xl font-bold tracking-tight text-center">Welcome back</h1>
+                    <h1 className="text-2xl font-bold tracking-tight text-center">Create an account</h1>
                     <p className="text-sm text-muted-foreground text-center mt-2">
-                        Enter your credentials to access your account
+                        Enter your details to get started
                     </p>
                 </div>
 
                 <div className="bg-card border border-border/50 rounded-2xl shadow-sm p-8 space-y-6">
                     <div className="space-y-4">
                         <div className="space-y-2">
+                            <Label htmlFor="name">Full Name</Label>
+                            <Input id="name" placeholder="John Doe" className="bg-background/50" />
+                        </div>
+                        <div className="space-y-2">
                             <Label htmlFor="email">Email</Label>
                             <Input id="email" type="email" placeholder="name@example.com" className="bg-background/50" />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="password">Password</Label>
-                            <Input id="password" type="password" className="bg-background/50" />
+                            <Label htmlFor="mobile">Mobile Number <span className="text-muted-foreground font-normal">(Optional)</span></Label>
+                            <Input id="mobile" type="tel" placeholder="+1 (555) 000-0000" className="bg-background/50" />
                         </div>
-                        <Button className="w-full">Sign in</Button>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="password">Password</Label>
+                                <Input id="password" type="password" className="bg-background/50" />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="confirmPassword">Confirm</Label>
+                                <Input id="confirmPassword" type="password" className="bg-background/50" />
+                            </div>
+                        </div>
+                        <Button className="w-full">Create account</Button>
                     </div>
 
                     <div className="relative">
@@ -40,7 +54,7 @@ const Login = () => {
                             <span className="w-full border-t border-border/50" />
                         </div>
                         <div className="relative flex justify-center text-xs uppercase">
-                            <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
+                            <span className="bg-card px-2 text-muted-foreground">Or register with</span>
                         </div>
                     </div>
 
@@ -65,9 +79,9 @@ const Login = () => {
                 </div>
 
                 <p className="text-center text-sm text-muted-foreground mt-8">
-                    Don&apos;t have an account?{" "}
-                    <Link to="/signup" className="text-primary hover:underline underline-offset-4">
-                        Sign up
+                    Already have an account?{" "}
+                    <Link to="/login" className="text-primary hover:underline underline-offset-4">
+                        Sign in
                     </Link>
                 </p>
             </div>
@@ -75,4 +89,4 @@ const Login = () => {
     );
 };
 
-export default Login;
+export default Signup;
