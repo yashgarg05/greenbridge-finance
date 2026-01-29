@@ -1,11 +1,23 @@
-import { Button } from "@/components/ui/button";
 import { useNavigate, Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Github, Apple } from "lucide-react";
+import { useState } from "react";
 
 const Signup = () => {
     const navigate = useNavigate();
+    const [formData, setFormData] = useState({
+        name: "",
+        email: "",
+        mobile: ""
+    });
+
+    const handleSignup = () => {
+        localStorage.setItem('user_name', formData.name || 'Yash Garg');
+        localStorage.setItem('user_email', formData.email || 'yash@greenbridge.finance');
+        if (formData.mobile) localStorage.setItem('user_mobile', formData.mobile);
+        navigate('/dashboard');
+    };
 
     return (
         <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 relative overflow-hidden">
@@ -28,15 +40,35 @@ const Signup = () => {
                     <div className="space-y-4">
                         <div className="space-y-2">
                             <Label htmlFor="name">Full Name</Label>
-                            <Input id="name" placeholder="John Doe" className="bg-background/50" />
+                            <Input
+                                id="name"
+                                placeholder="John Doe"
+                                className="bg-background/50"
+                                value={formData.name}
+                                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                            />
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="email">Email</Label>
-                            <Input id="email" type="email" placeholder="name@example.com" className="bg-background/50" />
+                            <Input
+                                id="email"
+                                type="email"
+                                placeholder="name@example.com"
+                                className="bg-background/50"
+                                value={formData.email}
+                                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                            />
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="mobile">Mobile Number <span className="text-muted-foreground font-normal">(Optional)</span></Label>
-                            <Input id="mobile" type="tel" placeholder="+1 (555) 000-0000" className="bg-background/50" />
+                            <Input
+                                id="mobile"
+                                type="tel"
+                                placeholder="+1 (555) 000-0000"
+                                className="bg-background/50"
+                                value={formData.mobile}
+                                onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
+                            />
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
@@ -48,7 +80,7 @@ const Signup = () => {
                                 <Input id="confirmPassword" type="password" className="bg-background/50" />
                             </div>
                         </div>
-                        <Button className="w-full" onClick={() => navigate('/dashboard')}>Create account</Button>
+                        <Button className="w-full" onClick={handleSignup}>Create account</Button>
                     </div>
 
                     <div className="relative">
