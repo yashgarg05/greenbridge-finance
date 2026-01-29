@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Suspense, lazy } from "react";
 
+<<<<<<< HEAD
 // Lazy Load Pages
 const Index = lazy(() => import("./pages/Index"));
 const NotFound = lazy(() => import("./pages/NotFound"));
@@ -15,6 +16,15 @@ const Signup = lazy(() => import("./pages/Signup"));
 const Solutions = lazy(() => import("./pages/Solutions"));
 const Methodology = lazy(() => import("./pages/Methodology"));
 const MyListings = lazy(() => import("./pages/MyListings"));
+=======
+import Index from "./pages/Index";
+import NotFound from "./pages/NotFound";
+import Dashboard from "./pages/Dashboard";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
+import Solutions from "./pages/Solutions";
+const Methodology = lazy(() => import('./pages/Methodology'));
+>>>>>>> dc41104 (minimal)
 
 const queryClient = new QueryClient();
 
@@ -34,6 +44,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+<<<<<<< HEAD
         <Suspense fallback={<Loading />}>
           <Routes>
             <Route path="/" element={<Index />} />
@@ -47,6 +58,18 @@ const App = () => (
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
+=======
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/solutions" element={<Solutions />} />
+          <Route path="/methodology" element={<Methodology />} />
+          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+>>>>>>> dc41104 (minimal)
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
