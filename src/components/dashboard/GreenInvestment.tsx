@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -26,7 +26,8 @@ import {
     Search,
     Factory,
     Upload,
-    Plus
+    Plus,
+    ListChecks
 } from "lucide-react";
 import {
     Dialog,
@@ -49,8 +50,21 @@ import { Bot, Bell } from "lucide-react";
 
 
 // --- Types ---
+// --- Types ---
 type ProjectType = 'Solar' | 'Forestry' | 'Wind' | 'Water' | 'Direct Air Capture';
 type QualityRating = 'AAA' | 'AA' | 'A' | 'B+';
+type ListingStatus = 'Pending' | 'Verified' | 'Rejected';
+
+interface UserListing {
+    id: string;
+    title: string;
+    category: string;
+    description: string;
+    price: string;
+    credits: string;
+    status: ListingStatus;
+    submittedAt: string;
+}
 
 interface Project {
     id: string;
@@ -171,6 +185,8 @@ const projects: Project[] = [
 
 // --- Components ---
 
+// --- Components ---
+
 const CategoryBadge = ({ category }: { category: ProjectType }) => {
     const styles = {
         'Solar': {
@@ -232,6 +248,36 @@ const QualityBadge = ({ rating }: { rating: QualityRating }) => {
 };
 
 export const GreenInvestment = () => {
+    // User Listings State
+    const [myListings, setMyListings] = useState<UserListing[]>(() => {
+        const saved = localStorage.getItem('user_listings');
+        return saved ? JSON.parse(saved) : [];
+    });
+    const [isMyListingsOpen, setIsMyListingsOpen] = useState(false);
+
+    useEffect(() => {
+        localStorage.setItem('user_listings', JSON.stringify(myListings));
+    }, [myListings]);
+
+    const simulateVerification = (id: string, newStatus: ListingStatus) => {
+        toast({
+            title: "Processing Verification...",
+            description: "Simulating admin review process.",
+        });
+
+        setTimeout(() => {
+            setMyListings(prev => prev.map(item =>
+                item.id === id ? { ...item, status: newStatus } : item
+            ));
+
+            toast({
+                title: `Project ${newStatus}`,
+                description: `The project has been marked as ${newStatus}.`,
+                variant: newStatus === 'Verified' ? 'default' : 'destructive'
+            });
+        }, 1500);
+    };
+
     // Filters
     const [priceRange, setPriceRange] = useState<[number, number]>([0, 200]);
     const [selectedType, setSelectedType] = useState<string>('all');
@@ -243,6 +289,8 @@ export const GreenInvestment = () => {
     const [budgetInput, setBudgetInput] = useState<string>('');
     const [smartMix, setSmartMix] = useState<Project[] | null>(null);
     const [mixType, setMixType] = useState<'standard' | 'balanced'>('standard');
+
+
 
     const { toast } = useToast();
     const [isListingOpen, setIsListingOpen] = useState(false);
@@ -258,7 +306,6 @@ export const GreenInvestment = () => {
     });
 
     const handleListingSubmit = () => {
-        // Validation (Basic)
         if (!listingForm.title || !listingForm.contactEmail) {
             toast({
                 title: "Missing Information",
@@ -268,25 +315,38 @@ export const GreenInvestment = () => {
             return;
         }
 
-        // Simulate API call
-        setTimeout(() => {
-            toast({
-                title: "Request Submitted Successfully",
-                description: "Our team will verify your project details and contact you shortly.",
-            });
-            setIsListingOpen(false);
-            setListingForm({
-                title: '',
-                description: '',
-                location: '',
-                category: '',
-                price: '',
-                credits: '',
-                contactName: '',
-                contactEmail: ''
-            });
-        }, 1000);
+        // Create new listing
+        const newListing: UserListing = {
+            id: Date.now().toString(),
+            title: listingForm.title,
+            category: listingForm.category,
+            description: listingForm.description,
+            price: listingForm.price,
+            credits: listingForm.credits,
+            status: 'Pending',
+            submittedAt: new Date().toLocaleDateString()
+        };
+
+        setMyListings(prev => [newListing, ...prev]);
+
+        toast({
+            title: "Request Submitted Successfully",
+            description: "Your project has been submitted for verification. Tracking ID: " + newListing.id,
+        });
+
+        setIsListingOpen(false);
+        setListingForm({
+            title: '',
+            description: '',
+            location: '',
+            category: '',
+            price: '',
+            credits: '',
+            contactName: '',
+            contactEmail: ''
+        });
     };
+
 
     // --- New Features State ---
     const [comparisonList, setComparisonList] = useState<string[]>([]);

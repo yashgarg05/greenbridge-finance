@@ -22,6 +22,10 @@ const Dashboard = () => {
             navigate('/methodology');
             return;
         }
+        if (tab === 'listings') {
+            navigate('/my-listings');
+            return;
+        }
         setActiveTab(tab);
     };
 
