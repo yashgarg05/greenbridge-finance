@@ -155,15 +155,49 @@ const projects: Project[] = [
 
 // --- Components ---
 
-const CategoryIcon = ({ category }: { category: ProjectType }) => {
-    switch (category) {
-        case 'Solar': return <Sun className="w-4 h-4 text-orange-500" />;
-        case 'Forestry': return <Sprout className="w-4 h-4 text-green-500" />;
-        case 'Wind': return <Wind className="w-4 h-4 text-blue-500" />;
-        case 'Water': return <Droplets className="w-4 h-4 text-cyan-500" />;
-        case 'Direct Air Capture': return <Factory className="w-4 h-4 text-gray-500" />;
-        default: return <Sprout className="w-4 h-4" />;
-    }
+const CategoryBadge = ({ category }: { category: ProjectType }) => {
+    const styles = {
+        'Solar': {
+            bg: 'bg-amber-50 dark:bg-amber-900/20',
+            text: 'text-amber-700 dark:text-amber-400',
+            border: 'border-amber-200 dark:border-amber-800',
+            icon: Sun
+        },
+        'Forestry': {
+            bg: 'bg-emerald-50 dark:bg-emerald-900/20',
+            text: 'text-emerald-700 dark:text-emerald-400',
+            border: 'border-emerald-200 dark:border-emerald-800',
+            icon: Sprout
+        },
+        'Wind': {
+            bg: 'bg-sky-50 dark:bg-sky-900/20',
+            text: 'text-sky-700 dark:text-sky-400',
+            border: 'border-sky-200 dark:border-sky-800',
+            icon: Wind
+        },
+        'Water': {
+            bg: 'bg-cyan-50 dark:bg-cyan-900/20',
+            text: 'text-cyan-700 dark:text-cyan-400',
+            border: 'border-cyan-200 dark:border-cyan-800',
+            icon: Droplets
+        },
+        'Direct Air Capture': {
+            bg: 'bg-slate-50 dark:bg-slate-900/20',
+            text: 'text-slate-700 dark:text-slate-400',
+            border: 'border-slate-200 dark:border-slate-800',
+            icon: Factory
+        }
+    };
+
+    const style = styles[category] || styles['Forestry'];
+    const Icon = style.icon;
+
+    return (
+        <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-medium border transition-colors ${style.bg} ${style.text} ${style.border}`}>
+            <Icon className="w-3.5 h-3.5" />
+            {category}
+        </span>
+    );
 };
 
 const QualityBadge = ({ rating }: { rating: QualityRating }) => {
@@ -608,10 +642,7 @@ export const GreenInvestment = () => {
 
                             <CardHeader className="pb-2 px-4 pt-4">
                                 <div className="flex justify-between items-start mb-1">
-                                    <Badge variant="outline" className="w-fit flex items-center gap-1 text-[10px] h-5 px-1.5">
-                                        <CategoryIcon category={project.category} />
-                                        {project.category}
-                                    </Badge>
+                                    <CategoryBadge category={project.category} />
                                     <QualityBadge rating={project.qualityRating} />
                                 </div>
                                 <CardTitle className="text-base leading-tight mt-1">{project.title}</CardTitle>

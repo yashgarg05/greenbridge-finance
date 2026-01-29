@@ -73,7 +73,9 @@ const Login = () => {
                             <span className="sr-only">Microsoft</span>
                         </Button>
                         <Button variant="outline" className="w-full px-0">
-                            <Apple className="h-4 w-4" />
+                            <svg className="h-4 w-4" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="apple" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512">
+                                <path fill="currentColor" d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-54.5-127.1-54.5-127.1zM273.3 47c0 24.1 12.7 67.6 62.9 73.1 6.8-59.2-26-118-70-118-24.3 0-66.3 35.5-62.9 86.9V47z"></path>
+                            </svg>
                             <span className="sr-only">Apple</span>
                         </Button>
                     </div>
