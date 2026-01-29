@@ -29,15 +29,7 @@ export const FeatureShortcuts = ({ onTabChange }: FeatureShortcutsProps) => {
             color: "text-green-500",
             bg: "bg-green-500/10"
         },
-        {
-            id: 'compliance',
-            title: "Compliance Panel",
-            description: "Manage reports and audit trails.",
-            icon: ShieldCheck,
-            action: () => onTabChange('compliance'),
-            color: "text-purple-500",
-            bg: "bg-purple-500/10"
-        }
+
     ];
 
     return (

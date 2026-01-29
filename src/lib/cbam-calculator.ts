@@ -160,7 +160,7 @@ export function generateRecommendations(input: CBAMInput, result: CBAMResult): R
 }
 
 export function formatCurrency(value: number, currency: string = 'EUR'): string {
-  return new Intl.NumberFormat('en-EU', {
+  return new Intl.NumberFormat('en-IE', {
     style: 'currency',
     currency,
     minimumFractionDigits: 2,
@@ -169,7 +169,7 @@ export function formatCurrency(value: number, currency: string = 'EUR'): string 
 }
 
 export function formatNumber(value: number, decimals: number = 2): string {
-  return new Intl.NumberFormat('en-EU', {
+  return new Intl.NumberFormat('en-IE', {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
   }).format(value);
