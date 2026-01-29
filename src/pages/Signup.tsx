@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { useNavigate, Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Github, Apple } from "lucide-react";
+import { Github } from "lucide-react";
 import { useState } from "react";
 
 const Signup = () => {
@@ -107,7 +107,10 @@ const Signup = () => {
                             <span className="sr-only">Microsoft</span>
                         </Button>
                         <Button variant="outline" className="w-full px-0">
-                            <Apple className="h-4 w-4" />
+                            <svg className="h-4 w-4" viewBox="0 0 1024 1024" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+                                <path d="M768.8 512.6c.9-119.7 98.3-176.9 101.5-179.1-55.8-81.2-142.6-92.4-173.6-93.6-73.9-7.6-143.9 43.6-181.4 43.6-37.3 0-96.9-42.6-159.5-41.7-81.9 1.3-157.9 47.8-200 121.3C63 628.6 126.3 854.8 209.6 979.6c40.8 60.6 89.3 128.9 153.5 126.6 60.8-2.2 83.9-39.3 157.6-39.3 73.6 0 93.5 39.3 157.8 38.3 64.6-1 105.4-61.9 145.1-122.6 44.9-68.1 63.6-134.5 64.8-139.3-1.6-.7-124-47.6-124.9-188.5z"/>
+                                <path d="M657.1 136.4c41.5-50.2 69.4-120.3 61.3-190.4-57.8 2.3-128.1 39.9-169.6 90.1-37.6 44.9-70.5 116.9-62 186.6 66.6 5.2 134.7-33.4 170.3-86.3z" transform="translate(-96)" />
+                            </svg>
                             <span className="sr-only">Apple</span>
                         </Button>
                     </div>
