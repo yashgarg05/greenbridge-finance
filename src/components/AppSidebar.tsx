@@ -1,4 +1,4 @@
-import { Home, Calculator, ShoppingCart, FileText, Moon, Sun, Sprout, ShieldCheck } from 'lucide-react';
+import { Home, Calculator, ShoppingCart, FileText, Moon, Sun, Sprout, ShieldCheck, Trees } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useEffect, useState } from 'react';
 
@@ -42,7 +42,7 @@ export function AppSidebar({ activeTab, onTabChange }: AppSidebarProps) {
     <aside className="w-16 border-r border-border bg-card flex flex-col items-center py-4 shrink-0">
       {/* Logo */}
       <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center mb-8">
-        <span className="text-primary-foreground font-bold text-lg">G</span>
+        <Trees className="h-6 w-6 text-primary-foreground" />
       </div>
 
       {/* Navigation */}

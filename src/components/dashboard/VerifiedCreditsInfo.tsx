@@ -1,5 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ShieldCheck, Lock, Globe } from "lucide-react";
+import { ShieldCheck, Globe } from "lucide-react";
 
 export const VerifiedCreditsInfo = () => {
     return (
@@ -19,16 +19,6 @@ export const VerifiedCreditsInfo = () => {
                 </p>
 
                 <div className="space-y-4">
-                    <div className="flex gap-3">
-                        <div className="h-8 w-8 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center shrink-0">
-                            <Lock className="h-4 w-4 text-blue-600" />
-                        </div>
-                        <div>
-                            <h4 className="text-sm font-semibold">Blockchain Verified</h4>
-                            <p className="text-xs text-muted-foreground">Every credit is tokenized on-chain to prevent double-counting and ensure immutable ownership history.</p>
-                        </div>
-                    </div>
-
                     <div className="flex gap-3">
                         <div className="h-8 w-8 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center shrink-0">
                             <Globe className="h-4 w-4 text-blue-600" />
