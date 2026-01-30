@@ -12,12 +12,19 @@ const Signup = () => {
     const [formData, setFormData] = useState({
         name: "",
         email: "",
-        mobile: ""
+        mobile: "",
+        password: "",
+        confirmPassword: ""
     });
 
     const handleSignup = async () => {
         try {
-            await signUp(formData.email, 'password123', {
+            if (formData.password !== formData.confirmPassword) {
+                // toast error?
+                console.error("Passwords do not match");
+                return;
+            }
+            await signUp(formData.email, formData.password, {
                 full_name: formData.name,
                 mobile: formData.mobile
             });
@@ -54,6 +61,26 @@ const Signup = () => {
                                 className="bg-background/50"
                                 value={formData.name}
                                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="password">Password</Label>
+                            <Input
+                                id="password"
+                                type="password"
+                                className="bg-background/50"
+                                value={formData.password}
+                                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="confirmPassword">Confirm Password</Label>
+                            <Input
+                                id="confirmPassword"
+                                type="password"
+                                className="bg-background/50"
+                                value={formData.confirmPassword}
+                                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                             />
                         </div>
                         <div className="space-y-2">

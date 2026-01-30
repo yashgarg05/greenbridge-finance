@@ -1,7 +1,7 @@
-from omnidimension import Client
+import os
 
 # Initialize client
-client = Client(api_key)
+client = Client(os.getenv("OMNIDIMENSION_API_KEY"))
 
 # Create an agent
 response = client.agent.create(
