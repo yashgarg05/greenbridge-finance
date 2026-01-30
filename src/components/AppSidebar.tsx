@@ -11,14 +11,8 @@ interface AppSidebarProps {
 const navItems = [
   { id: 'overview', icon: Home, label: 'Home' },
   { id: 'invest', icon: Sprout, label: 'Invest' },
-<<<<<<< HEAD
   { id: 'listings', icon: ListChecks, label: 'My Listings', path: '/my-listings' },
   { id: 'calculator', icon: Calculator, label: 'Calculator' },
-=======
-
-  { id: 'calculator', icon: Calculator, label: 'Calculator' },
-
->>>>>>> dc41104 (minimal)
   { id: 'settings', icon: Settings, label: 'Settings' },
 ];
 
@@ -64,11 +58,7 @@ export function AppSidebar({ activeTab, onTabChange }: AppSidebarProps) {
           return (
             <button
               key={item.id}
-<<<<<<< HEAD
               onClick={() => handleNavigation(item.id, item.path)}
-=======
-              onClick={() => onTabChange(item.id)}
->>>>>>> dc41104 (minimal)
               title={item.label}
               className={cn(
                 'w-10 h-10 rounded-lg flex items-center justify-center transition-all active:scale-95',

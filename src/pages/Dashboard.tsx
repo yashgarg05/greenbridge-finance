@@ -3,17 +3,9 @@ import { useNavigate, useLocation } from 'react-router-dom';
 
 import { AppSidebar } from '@/components/AppSidebar';
 import { CBAMCalculator } from '@/components/CBAMCalculator';
-<<<<<<< HEAD
 import { ProjectInfo } from '@/components/dashboard/ProjectInfo';
 import { FormulaBreakdown } from '@/components/dashboard/FormulaBreakdown';
 import { GreenInvestment } from '@/components/dashboard/GreenInvestment';
-=======
-
-import { ProjectInfo } from '@/components/dashboard/ProjectInfo';
-import { FormulaBreakdown } from '@/components/dashboard/FormulaBreakdown';
-import { GreenInvestment } from '@/components/dashboard/GreenInvestment';
-
->>>>>>> dc41104 (minimal)
 import { VerifiedCreditsInfo } from '@/components/dashboard/VerifiedCreditsInfo';
 import { FeatureShortcuts } from '@/components/dashboard/FeatureShortcuts';
 import { SettingsPanel } from '@/components/dashboard/SettingsPanel';
@@ -49,18 +41,10 @@ const Dashboard = () => {
 
     const renderContent = () => {
         switch (activeTab) {
-<<<<<<< HEAD
-=======
-
->>>>>>> dc41104 (minimal)
             case 'invest':
                 return <GreenInvestment initialOpenListing={location.state?.openListingModal} />;
             case 'calculator':
                 return <CBAMCalculator />;
-<<<<<<< HEAD
-=======
-
->>>>>>> dc41104 (minimal)
             case 'settings':
                 return <SettingsPanel />;
             default:
@@ -110,94 +94,6 @@ const Dashboard = () => {
 
 
 
-<<<<<<< HEAD
-=======
-                                <button
-                                    className="w-full h-10 rounded-md bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors"
-                                    onClick={() => {
-                                        setCallStage('connecting');
-                                        setTimeout(() => {
-                                            setCallStage('connected');
-                                        }, 5000);
-                                    }}
-                                >
-                                    Start Call
-                                </button>
-                                <button
-                                    className="w-full text-sm text-muted-foreground hover:text-foreground"
-                                    onClick={() => setIsCallOpen(false)}
-                                >
-                                    Cancel
-                                </button>
-                            </div>
-                        )}
-
-                        {/* CONNECTING / CONNECTED STAGE */}
-                        {callStage !== 'setup' && (
-                            <div className="bg-gradient-to-b from-indigo-500/10 to-transparent p-8 flex flex-col items-center justify-center space-y-6">
-
-                                {/* Avatar / Status */}
-                                <div className="relative">
-                                    <div className={`w-24 h-24 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center shadow-lg ${callStage === 'connecting' ? 'animate-pulse' : ''}`}>
-                                        <Bot className="h-10 w-10 text-white" />
-                                    </div>
-                                    {callStage === 'connecting' && (
-                                        <>
-                                            <span className="absolute -inset-1 rounded-full border-2 border-indigo-500 animate-ping opacity-75"></span>
-                                            <span className="absolute -inset-3 rounded-full border border-purple-500 animate-pulse opacity-50"></span>
-                                        </>
-                                    )}
-                                </div>
-
-                                {/* Text Info */}
-                                <div className="text-center space-y-2">
-                                    <h3 className="text-xl font-bold tracking-tight">Alex</h3>
-                                    <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">B2B Sustainability Advisor</p>
-
-                                    {callStage === 'connecting' ? (
-                                        <div className="space-y-1">
-                                            <p className="text-sm text-muted-foreground animate-pulse mt-2">Connecting secure line...</p>
-                                            {phoneNumber && <p className="text-xs text-muted-foreground/60">Dialing {phoneNumber}</p>}
-                                        </div>
-                                    ) : (
-                                        <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
-                                            <p className="text-lg font-mono font-medium text-green-600 dark:text-green-400">
-                                                {formatTime(timer)}
-                                            </p>
-                                            <div className="bg-muted/50 p-3 rounded-lg text-sm text-left italic text-muted-foreground border border-border/50">
-                                                "Hi, this is Alex from GreenFlux. Have you calculated your 2026 CBAM liability yet?"
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-
-                                {/* Controls */}
-                                <div className="pt-4 flex gap-4">
-                                    <button className="h-12 w-12 rounded-full bg-muted flex items-center justify-center hover:bg-muted/80 transition-colors">
-                                        <Mic className="h-5 w-5 text-muted-foreground" />
-                                    </button>
-                                    <button
-                                        className="h-14 w-14 rounded-full bg-red-500 flex items-center justify-center shadow-lg hover:bg-red-600 hover:scale-105 transition-all"
-                                        onClick={() => {
-                                            setIsCallOpen(false);
-                                            setCallStage('setup');
-                                            setTimer(0);
-                                        }}
-                                    >
-                                        <PhoneOff className="h-6 w-6 text-white" />
-                                    </button>
-                                    <button className="h-12 w-12 rounded-full bg-muted flex items-center justify-center hover:bg-muted/80 transition-colors">
-                                        <Volume2 className="h-5 w-5 text-muted-foreground" />
-                                    </button>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            )}
-
-
->>>>>>> dc41104 (minimal)
         </div>
     );
 };
