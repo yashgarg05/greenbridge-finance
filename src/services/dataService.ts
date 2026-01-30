@@ -131,11 +131,32 @@ export const dataService = {
         const totalInvested = investments?.reduce((sum, item) => sum + Number(item.amount_invested), 0) || 0;
         const totalCredits = investments?.reduce((sum, item) => sum + Number(item.credits_purchased), 0) || 0;
 
+        // 2. Calculate Risk from Sensor Data
+        const { data: readings } = await supabase
+            .from('sensor_readings')
+            .select('value')
+            .eq('user_id', userId)
+            .order('timestamp', { ascending: false })
+            .limit(20);
+
+        let risk = "Low";
+        if (readings && readings.length > 0) {
+            // Check for any recent spikes > 480 (Limit is usually 500)
+            const hasSpike = readings.some(r => r.value > 480);
+            const avg = readings.reduce((a, b) => a + b.value, 0) / readings.length;
+
+            if (hasSpike || avg > 450) risk = "High";
+            else if (avg > 420) risk = "Medium";
+        } else {
+            // If no data, assume checking... or Low
+            risk = "Low";
+        }
+
         return {
             portfolioValue: `₹${totalInvested.toLocaleString()}`,
             credits: totalCredits,
-            impactScore: Math.floor(totalCredits * 0.8), // Mock logic for impact
-            risk: "Low" // Placeholder logic
+            impactScore: Math.floor(totalCredits * 1.25), // Impact metric
+            risk: risk
         };
     },
 

@@ -36,13 +36,16 @@ const Dashboard = () => {
 
     useEffect(() => {
         const loadData = async () => {
-            const s = await dataService.getUserStats();
-            const a = await dataService.getRecentActivity();
-            setStats(s);
-            setActivity(a);
+            if (user?.id) {
+                const s = await dataService.getUserStats(user.id);
+                // Also pass user ID for activity if supported, otherwise it gets public/related activity
+                const a = await dataService.getRecentActivity(user.id);
+                setStats(s);
+                setActivity(a);
+            }
         };
         loadData();
-    }, []);
+    }, [user]);
 
     // Update active tab if location state changes
     useEffect(() => {

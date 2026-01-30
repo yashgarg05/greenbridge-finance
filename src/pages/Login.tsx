@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Apple } from "lucide-react";
+import { Play } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
 const Login = () => {
@@ -54,17 +54,72 @@ const Login = () => {
                             <Input id="password" type="password" className="bg-background/50" />
                         </div>
                         <Button className="w-full" onClick={handleLogin}>Sign in</Button>
+
+                        <div className="relative">
+                            <div className="absolute inset-0 flex items-center">
+                                <span className="w-full border-t" />
+                            </div>
+                            <div className="relative flex justify-center text-xs uppercase">
+                                <span className="bg-card px-2 text-muted-foreground">
+                                    Or
+                                </span>
+                            </div>
+                        </div>
+
+                        <Button
+                            variant="outline"
+                            className="w-full border-primary/20 hover:bg-primary/5 text-primary"
+                            onClick={async () => {
+                                const { supabase } = await import("@/integrations/supabase/client");
+                                const { dataService } = await import("@/services/dataService");
+
+                                // 1. Try Login
+                                const { error } = await supabase.auth.signInWithPassword({
+                                    email: 'demo@greenbridge.com',
+                                    password: 'demoUser123!'
+                                });
+
+                                // 2. If fail, Signup
+                                if (error) {
+                                    const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+                                        email: 'demo@greenbridge.com',
+                                        password: 'demoUser123!',
+                                        options: {
+                                            data: {
+                                                full_name: 'Demo User',
+                                                company_name: 'GreenBridge Demo Ltd.'
+                                            }
+                                        }
+                                    });
+                                    if (signUpError) {
+                                        console.error(signUpError);
+                                        return;
+                                    }
+                                }
+
+                                // 3. Seed Data & Redirect
+                                // Wait a moment for session to establish
+                                setTimeout(async () => {
+                                    const user = (await supabase.auth.getUser()).data.user;
+                                    if (user) {
+                                        await dataService.seedDemoData(user.id);
+                                        navigate('/dashboard');
+                                    }
+                                }, 1000);
+                            }}
+                        >
+                            <Play className="mr-2 h-4 w-4" /> {/* Reusing icon or replace with Zap/Play */}
+                            Try Demo Account
+                        </Button>
                     </div>
 
-
+                    <p className="text-center text-sm text-muted-foreground mt-8">
+                        Don&apos;t have an account?{" "}
+                        <Link to="/signup" className="text-primary hover:underline underline-offset-4">
+                            Sign up
+                        </Link>
+                    </p>
                 </div>
-
-                <p className="text-center text-sm text-muted-foreground mt-8">
-                    Don&apos;t have an account?{" "}
-                    <Link to="/signup" className="text-primary hover:underline underline-offset-4">
-                        Sign up
-                    </Link>
-                </p>
             </div>
         </div>
     );

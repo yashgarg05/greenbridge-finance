@@ -27,6 +27,7 @@ import {
     Lock,
     ArrowRight
 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
 import { listingService, Listing } from "@/services/listingService";
@@ -83,10 +84,12 @@ const CategoryBadge = ({ category }: { category: string }) => {
 export const GreenInvestment = () => {
     const { toast } = useToast();
     const navigate = useNavigate();
+    const { user } = useAuth(); // Use Auth Context
     const [projects, setProjects] = useState<Listing[]>([]);
-    const [currentUserEmail, setCurrentUserEmail] = useState<string | null>(null);
 
-    // Initial Load
+    // Derived state for compatibility (optional, or just use user.email directly)
+    const currentUserEmail = user?.email;
+
     // Initial Load
     useEffect(() => {
         const loadListings = async () => {
@@ -98,11 +101,7 @@ export const GreenInvestment = () => {
         // POLL for updates (simulating realtime marketplace)
         const interval = setInterval(() => {
             loadListings();
-        }, 5000); // Increased polling interval to be kinder to API
-
-        // Get Current User (Use UUID from Auth Context ideally, but verifying email for now)
-        const email = localStorage.getItem('user_email');
-        setCurrentUserEmail(email);
+        }, 5000);
 
         return () => clearInterval(interval);
     }, []);
