@@ -1,24 +1,35 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Bot, Sparkles, PhoneOff, Mic, Volume2 } from 'lucide-react';
+import { Bot, Sparkles, PhoneOff, Mic, Volume2, TrendingUp, ShieldCheck, Leaf, Activity, ArrowUpRight, Clock, MapPin, Zap } from 'lucide-react';
 import { AppSidebar } from '@/components/AppSidebar';
 import { CBAMCalculator } from '@/components/CBAMCalculator';
-import { DocumentVault } from '@/components/DocumentVault';
+
 import { ProjectInfo } from '@/components/dashboard/ProjectInfo';
 import { FormulaBreakdown } from '@/components/dashboard/FormulaBreakdown';
 import { GreenInvestment } from '@/components/dashboard/GreenInvestment';
 import { ComplianceControlPanel } from '@/components/dashboard/ComplianceControlPanel';
-import { VerifiedCreditsInfo } from '@/components/dashboard/VerifiedCreditsInfo';
 import { FeatureShortcuts } from '@/components/dashboard/FeatureShortcuts';
 import { SettingsPanel } from '@/components/dashboard/SettingsPanel';
-import { ChatSupport } from '@/components/dashboard/ChatSupport';
+
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { toast } from "sonner";
+
+// --- Mock Data for Dashboard ---
+const RECENT_ACTIVITY = [
+    { id: 1, type: 'invest', project: 'Sahara Solar Initiative', amount: '₹15,00,000', time: '2 mins ago', status: 'Pending' },
+    { id: 2, type: 'verify', project: 'Gujarat Clean Water', amount: 'Gold Standard', time: '1 hour ago', status: 'Verified' },
+    { id: 3, type: 'compliance', project: 'CBAM Q1 Report', amount: 'Submitted', time: '4 hours ago', status: 'Success' },
+    { id: 4, type: 'market', project: 'Global Carbon Price', amount: '+2.4%', time: '6 hours ago', status: 'Up' },
+];
 
 const Dashboard = () => {
     const location = useLocation();
     const [activeTab, setActiveTab] = useState(location.state?.activeTab || 'overview');
     const navigate = useNavigate();
 
-    // Update active tab if location state changes (e.g. browsing back)
+    // Update active tab if location state changes
     useEffect(() => {
         if (location.state?.activeTab) {
             setActiveTab(location.state.activeTab);
@@ -26,86 +37,169 @@ const Dashboard = () => {
     }, [location.state]);
 
     const handleTabChange = (tab: string) => {
-        if (tab === 'methodology') {
-            navigate('/methodology');
-            return;
-        }
-        if (tab === 'listings') {
-            navigate('/my-listings');
-            return;
-        }
-        if (tab === 'exchange') {
-            navigate('/exchange');
-            return;
-        }
+        if (tab === 'methodology') { navigate('/methodology'); return; }
+        if (tab === 'listings') { navigate('/my-listings'); return; }
+        if (tab === 'exchange') { navigate('/exchange'); return; } // Kept for safety, though removed from nav
         setActiveTab(tab);
     };
 
-    // Call Simulation State
-    const [isCallOpen, setIsCallOpen] = useState(false);
-    const [callStage, setCallStage] = useState<'setup' | 'connecting' | 'connected'>('setup');
-    const [timer, setTimer] = useState(0);
 
-    // Call Settings
-    const [phoneNumber, setPhoneNumber] = useState('');
 
-    useEffect(() => {
-        let interval: NodeJS.Timeout;
-        if (isCallOpen && callStage === 'connected') {
-            interval = setInterval(() => {
-                setTimer(prev => prev + 1);
-            }, 1000);
-        }
-        return () => clearInterval(interval);
-    }, [isCallOpen, callStage]);
+    // --- Components for Command Center ---
 
-    const formatTime = (seconds: number) => {
-        const mins = Math.floor(seconds / 60);
-        const secs = seconds % 60;
-        return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-    };
+    const StatCard = ({ title, value, sub, icon: Icon, trend, color }: any) => (
+        <Card className={`relative overflow-hidden glass-card border-none shadow-lg hover:shadow-xl transition-all duration-300 group`}>
+            <div className={`absolute inset-0 bg-gradient-to-br ${color} opacity-10 dark:opacity-5 group-hover:opacity-20 dark:group-hover:opacity-10 transition-opacity`} />
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
+                <div className={`p-2 rounded-full bg-primary/10 dark:bg-white/5 backdrop-blur-md`}>
+                    <Icon className="h-4 w-4 text-primary dark:text-foreground/70" />
+                </div>
+            </CardHeader>
+            <CardContent>
+                <div className="text-2xl font-bold tracking-tight text-foreground">{value}</div>
+                <div className="flex items-center gap-2 mt-1">
+                    {trend && (
+                        <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-500 border-0 text-[10px] px-1.5 py-0">
+                            <TrendingUp className="h-3 w-3 mr-1" /> {trend}
+                        </Badge>
+                    )}
+                    <p className="text-xs text-muted-foreground">{sub}</p>
+                </div>
+            </CardContent>
+        </Card>
+    );
 
     const renderContent = () => {
         switch (activeTab) {
-            case 'compliance':
-                return <ComplianceControlPanel />;
-            case 'invest':
-                return <GreenInvestment />;
-            case 'calculator':
-                return <CBAMCalculator />;
-            case 'documents':
-                return <DocumentVault />;
-            case 'settings':
-                return <SettingsPanel />;
-            default:
-                return (
-                    <div className="space-y-6">
-                        {/* Header */}
-                        <div>
-                            <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-                            <p className="text-muted-foreground">CBAM Compliance Overview & Financial Projections</p>
+            case 'compliance': return <ComplianceControlPanel />;
+            case 'invest': return <GreenInvestment />;
+            case 'calculator': return <CBAMCalculator />;
+
+            case 'settings': return <SettingsPanel />;
+            default: return (
+                <div className="space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-700">
+
+                    {/* Hero Section */}
+                    <div className="flex items-center justify-between">
+                        <div className="space-y-1">
+                            <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-emerald-600 to-cyan-600 dark:from-emerald-400 dark:to-cyan-500 bg-clip-text text-transparent">
+                                Good Morning, Mr. Robot.
+                            </h1>
+                            <p className="text-muted-foreground flex items-center gap-2">
+                                <Clock className="w-3.5 h-3.5" />
+                                {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+                                <span className="text-border">|</span>
+                                <span className="text-emerald-600 dark:text-emerald-500 font-medium">Market Active 🟢</span>
+                            </p>
                         </div>
-
-                        {/* Main Layout */}
-                        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                            {/* Card 1: Verified Credits Info */}
-                            <div className="lg:col-span-2 h-full flex flex-col gap-6">
-                                <VerifiedCreditsInfo />
-                                <FeatureShortcuts onTabChange={handleTabChange} />
-                            </div>
-
-                            {/* Card 2: Project Info */}
-                            <div className="lg:col-span-1 h-full">
-                                <ProjectInfo />
-                            </div>
-
-                            {/* Row 2: Formula Breakdown */}
-                            <div className="lg:col-span-3">
-                                <FormulaBreakdown />
-                            </div>
+                        <div className="flex gap-3">
+                            {/* Quick Action Buttons */}
+                            <button className="flex items-center gap-2 px-4 py-2 rounded-full glass-panel border border-border/50 hover:bg-accent transition-colors text-sm font-medium" onClick={() => handleTabChange('invest')}>
+                                <Zap className="w-4 h-4 text-amber-500 dark:text-yellow-400" /> Quick Invest
+                            </button>
+                            <button className="flex items-center gap-2 px-4 py-2 rounded-full glass-panel border border-border/50 hover:bg-accent transition-colors text-sm font-medium" onClick={() => handleTabChange('calculator')}>
+                                <ArrowUpRight className="w-4 h-4 text-cyan-600 dark:text-cyan-400" /> CBAM Calc
+                            </button>
                         </div>
                     </div>
-                );
+
+                    {/* Stats Grid */}
+                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                        <StatCard
+                            title="Portfolio Value"
+                            value="₹2.4 Cr"
+                            sub="Total Assets"
+                            trend="+12.5%"
+                            icon={Activity}
+                            color="from-emerald-500 to-teal-500"
+                        />
+                        <StatCard
+                            title="Carbon Credits"
+                            value="12,450"
+                            sub="tCO2e Verified"
+                            trend="+850"
+                            icon={Leaf}
+                            color="from-green-500 to-lime-500"
+                        />
+                        <StatCard
+                            title="Impact Score"
+                            value="98.2"
+                            sub="Sustainability Rating"
+                            trend="Top 1%"
+                            icon={ShieldCheck}
+                            color="from-blue-500 to-indigo-500"
+                        />
+                        <StatCard
+                            title="Compliance Risk"
+                            value="Low"
+                            sub="CBAM Ready"
+                            icon={ShieldCheck}
+                            color="from-amber-500 to-orange-500"
+                        />
+                    </div>
+
+                    {/* Main Content Grid */}
+                    <div className="grid gap-6 md:grid-cols-7">
+
+                        {/* Left Column: Visuals & Deep Data */}
+                        <div className="col-span-4 space-y-6">
+                            {/* Project Info replaced with a more integrated 'Active Projects' view or maintained */}
+                            <Card className="glass-panel border-border/50 bg-white/50 dark:bg-black/20">
+                                <CardHeader>
+                                    <CardTitle className="text-lg font-medium flex items-center gap-2">
+                                        <TrendingUp className="w-4 h-4 text-emerald-500" />
+                                        Performance Analytics
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <FormulaBreakdown />
+                                </CardContent>
+                            </Card>
+                        </div>
+
+                        {/* Right Column: Live Feed & Shortcuts */}
+                        <div className="col-span-3 space-y-6">
+                            {/* Live Market Pulse */}
+                            <Card className="glass-panel border-border/50 bg-white/50 dark:bg-black/20 h-[300px] flex flex-col">
+                                <CardHeader className="pb-3">
+                                    <div className="flex items-center justify-between">
+                                        <CardTitle className="text-sm font-medium flex items-center gap-2">
+                                            <Activity className="w-4 h-4 text-rose-500" />
+                                            Live Market Pulse
+                                        </CardTitle>
+                                        <Badge variant="outline" className="text-[10px] animate-pulse text-rose-500 border-rose-500/50">LIVE</Badge>
+                                    </div>
+                                </CardHeader>
+                                <ScrollArea className="flex-1 px-4">
+                                    <div className="space-y-4 pr-2">
+                                        {RECENT_ACTIVITY.map((item) => (
+                                            <div key={item.id} className="flex items-start justify-between group">
+                                                <div className="flex gap-3 items-center">
+                                                    <div className={`w-2 h-2 rounded-full ${item.type === 'invest' ? 'bg-emerald-500' :
+                                                        item.type === 'verify' ? 'bg-blue-500' :
+                                                            item.type === 'market' ? 'bg-amber-500' : 'bg-purple-500'
+                                                        }`} />
+                                                    <div>
+                                                        <p className="text-sm font-medium leading-none group-hover:text-emerald-400 transition-colors">{item.project}</p>
+                                                        <p className="text-xs text-muted-foreground mt-1">{item.time}</p>
+                                                    </div>
+                                                </div>
+                                                <div className="text-right">
+                                                    <p className="text-sm font-semibold">{item.amount}</p>
+                                                    <p className="text-[10px] text-muted-foreground">{item.status}</p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </ScrollArea>
+                            </Card>
+
+                            <FeatureShortcuts onTabChange={handleTabChange} />
+                        </div>
+                    </div>
+                </div>
+            );
         }
     };
 
@@ -114,144 +208,14 @@ const Dashboard = () => {
             <AppSidebar activeTab={activeTab} onTabChange={handleTabChange} />
 
             <main className="flex-1 p-6 overflow-auto">
-                <div className="max-w-6xl mx-auto">
-                    <div key={activeTab} className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div className="max-w-7xl mx-auto">
+                    <div key={activeTab} className="h-full">
                         {renderContent()}
                     </div>
                 </div>
             </main>
 
-            {/* AI Agent Floating Button */}
-            <button
-                className="fixed bottom-6 right-6 h-14 px-6 rounded-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 flex items-center gap-2 z-50 group"
-                onClick={() => {
-                    setIsCallOpen(true);
-                    setCallStage('setup');
-                }}
-            >
-                <Bot className="h-6 w-6" />
-                <span className="font-semibold">Call AI Agent</span>
-                <Sparkles className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity absolute -top-1 -right-1 text-yellow-300" />
-            </button>
 
-            {/* AI Call UI */}
-            {isCallOpen && (
-                <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-                    {/* ... (Existing Call UI Content) ... actually I should verify I am not deleting content accidentally. 
-                        The replace block should be precise. 
-                        I will target the end of the return but BEFORE the closing div.
-                    */}
-                    <div className="bg-background rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden border border-primary/20 animate-in fade-in zoom-in-95 duration-300">
-                        {/* SETUP STAGE */}
-                        {callStage === 'setup' && (
-                            <div className="p-6 space-y-6">
-                                <div className="text-center space-y-2">
-                                    <div className="h-12 w-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                                        <Bot className="h-6 w-6 text-primary" />
-                                    </div>
-                                    <h3 className="text-lg font-bold">Configure Call</h3>
-                                    <p className="text-sm text-muted-foreground">Setup your AI Agent session</p>
-                                </div>
-
-                                <div className="space-y-4">
-                                    <div className="space-y-2">
-                                        <label className="text-xs font-medium uppercase text-muted-foreground">Mobile Number</label>
-                                        <input
-                                            type="tel"
-                                            placeholder="+1 (555) 000-0000"
-                                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                            value={phoneNumber}
-                                            onChange={(e) => setPhoneNumber(e.target.value)}
-                                        />
-                                    </div>
-                                </div>
-
-                                <button
-                                    className="w-full h-10 rounded-md bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors"
-                                    onClick={() => {
-                                        setCallStage('connecting');
-                                        setTimeout(() => {
-                                            setCallStage('connected');
-                                        }, 5000);
-                                    }}
-                                >
-                                    Start Call
-                                </button>
-                                <button
-                                    className="w-full text-sm text-muted-foreground hover:text-foreground"
-                                    onClick={() => setIsCallOpen(false)}
-                                >
-                                    Cancel
-                                </button>
-                            </div>
-                        )}
-
-                        {/* CONNECTING / CONNECTED STAGE */}
-                        {callStage !== 'setup' && (
-                            <div className="bg-gradient-to-b from-indigo-500/10 to-transparent p-8 flex flex-col items-center justify-center space-y-6">
-
-                                {/* Avatar / Status */}
-                                <div className="relative">
-                                    <div className={`w-24 h-24 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center shadow-lg ${callStage === 'connecting' ? 'animate-pulse' : ''}`}>
-                                        <Bot className="h-10 w-10 text-white" />
-                                    </div>
-                                    {callStage === 'connecting' && (
-                                        <>
-                                            <span className="absolute -inset-1 rounded-full border-2 border-indigo-500 animate-ping opacity-75"></span>
-                                            <span className="absolute -inset-3 rounded-full border border-purple-500 animate-pulse opacity-50"></span>
-                                        </>
-                                    )}
-                                </div>
-
-                                {/* Text Info */}
-                                <div className="text-center space-y-2">
-                                    <h3 className="text-xl font-bold tracking-tight">Alex</h3>
-                                    <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">B2B Sustainability Advisor</p>
-
-                                    {callStage === 'connecting' ? (
-                                        <div className="space-y-1">
-                                            <p className="text-sm text-muted-foreground animate-pulse mt-2">Connecting secure line...</p>
-                                            {phoneNumber && <p className="text-xs text-muted-foreground/60">Dialing {phoneNumber}</p>}
-                                        </div>
-                                    ) : (
-                                        <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
-                                            <p className="text-lg font-mono font-medium text-green-600 dark:text-green-400">
-                                                {formatTime(timer)}
-                                            </p>
-                                            <div className="bg-muted/50 p-3 rounded-lg text-sm text-left italic text-muted-foreground border border-border/50">
-                                                "Hi, this is Alex from GreenFlux. Have you calculated your 2026 CBAM liability yet?"
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-
-                                {/* Controls */}
-                                <div className="pt-4 flex gap-4">
-                                    <button className="h-12 w-12 rounded-full bg-muted flex items-center justify-center hover:bg-muted/80 transition-colors">
-                                        <Mic className="h-5 w-5 text-muted-foreground" />
-                                    </button>
-                                    <button
-                                        className="h-14 w-14 rounded-full bg-red-500 flex items-center justify-center shadow-lg hover:bg-red-600 hover:scale-105 transition-all"
-                                        onClick={() => {
-                                            setIsCallOpen(false);
-                                            setCallStage('setup');
-                                            setTimer(0);
-                                        }}
-                                    >
-                                        <PhoneOff className="h-6 w-6 text-white" />
-                                    </button>
-                                    <button className="h-12 w-12 rounded-full bg-muted flex items-center justify-center hover:bg-muted/80 transition-colors">
-                                        <Volume2 className="h-5 w-5 text-muted-foreground" />
-                                    </button>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            )}
-
-            {/* Chatbot Widget */}
-            <ChatSupport />
         </div>
     );
 };

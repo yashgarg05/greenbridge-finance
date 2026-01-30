@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,20 +13,24 @@ export const SettingsPanel = () => {
     const [emailNotifs, setEmailNotifs] = useState(true);
     const [marketingEmails, setMarketingEmails] = useState(false);
 
-    // Initialize state from localStorage
+    const { user } = useAuth();
+
+    // Initialize state from auth
     const [userData, setUserData] = useState({
-        name: "",
-        email: "",
-        company: ""
+        name: user?.user_metadata?.full_name || "Yash Garg",
+        email: user?.email || "yash@greenbridge.finance",
+        company: user?.user_metadata?.company || "GreenFlux Inc."
     });
 
     useEffect(() => {
-        setUserData({
-            name: localStorage.getItem('user_name') || "Yash Garg",
-            email: localStorage.getItem('user_email') || "yash@greenbridge.finance",
-            company: localStorage.getItem('user_company') || "GreenFlux Inc."
-        });
-    }, []);
+        if (user) {
+            setUserData({
+                name: user.user_metadata?.full_name || userData.name,
+                email: user.email || userData.email,
+                company: user.user_metadata?.company || userData.company
+            });
+        }
+    }, [user]);
 
     useEffect(() => {
         // Sync with current theme on mount

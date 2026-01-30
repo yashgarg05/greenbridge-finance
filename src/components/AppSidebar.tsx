@@ -2,6 +2,7 @@ import { Home, Calculator, ShoppingCart, FileText, Sprout, ShieldCheck, Trees, B
 import { cn } from '@/lib/utils';
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { ThemeToggle } from './ThemeToggle';
 
 interface AppSidebarProps {
   activeTab: string;
@@ -12,10 +13,9 @@ const navItems = [
   { id: 'overview', icon: Home, label: 'Home' },
   { id: 'invest', icon: Sprout, label: 'Invest' },
   { id: 'listings', icon: ListChecks, label: 'My Listings' },
-  { id: 'exchange', icon: TrendingUp, label: 'CCX Exchange' },
   { id: 'compliance', icon: ShieldCheck, label: 'Compliance' },
   { id: 'calculator', icon: Calculator, label: 'Calculator' },
-  { id: 'documents', icon: FileText, label: 'Docs' },
+
   { id: 'settings', icon: Settings, label: 'Settings' },
 ];
 
@@ -60,6 +60,10 @@ export function AppSidebar({ activeTab, onTabChange }: AppSidebarProps) {
           );
         })}
       </nav>
+      {/* Theme Toggle */}
+      <div className="mt-auto">
+        <ThemeToggle />
+      </div>
     </aside>
   );
 }

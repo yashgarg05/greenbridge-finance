@@ -4,14 +4,20 @@ import { Link, useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Apple } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Login = () => {
     const navigate = useNavigate();
+    const { signIn, loading } = useAuth();
     const [email, setEmail] = useState("");
 
-    const handleLogin = () => {
-        if (email) localStorage.setItem('user_email', email);
-        navigate('/dashboard');
+    const handleLogin = async () => {
+        try {
+            await signIn(email);
+            navigate('/dashboard');
+        } catch (error) {
+            console.error(error);
+        }
     };
     return (
         <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 relative overflow-hidden">
