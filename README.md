@@ -1,25 +1,10 @@
-# Welcome to Greenflux Project
+# Welcome to GreenBridge
+
+Visit the website at https://greenbridge-finance.vercel.app/
+and the ADMIN page at https://greenbridge-finance.vercel.app/admin
 
 ## Project info
-A minimalist B2B compliance engine bridging EU CBAM carbon liabilities with high-integrity India Green Credit Programme (GCP) offsets. Built for rapid industrial decarbonization. Topics: carbon-credits, cbam, esg-compliance, green-tech, fintech, india-gcp.
-
-Follow these steps:
-
-```
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
-
-## What technologies are used for this project?
+A B2B Carbon Emissions Tracker & Trading Platform
 
 This project is built with:
 
@@ -28,3 +13,5 @@ This project is built with:
 - React
 - shadcn-ui
 - Tailwind CSS
+
+- Supabase (postgresql)
