@@ -22,24 +22,25 @@ const AdminDashboard = () => {
         return () => clearInterval(interval);
     }, []);
 
-    const loadListings = () => {
-        setListings(listingService.getAll());
+    const loadListings = async () => {
+        const data = await listingService.getAll();
+        setListings(data);
     };
 
-    const handleApprove = (id: string) => {
-        listingService.updateStatus(id, 'Verified');
+    const handleApprove = async (id: string) => {
+        await listingService.updateStatus(id, 'Verified');
         toast.success("Project Approved", { description: "The listing is now live on the marketplace." });
         loadListings();
     };
 
-    const handleReject = (id: string) => {
-        listingService.updateStatus(id, 'Rejected');
+    const handleReject = async (id: string) => {
+        await listingService.updateStatus(id, 'Rejected');
         toast.error("Project Rejected", { description: "The submitter has been notified." });
         loadListings();
     };
 
-    const handleDelete = (id: string) => {
-        listingService.deleteListing(id);
+    const handleDelete = async (id: string) => {
+        await listingService.deleteListing(id);
         toast.info("Project Deleted");
         loadListings();
     };

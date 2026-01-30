@@ -125,28 +125,7 @@ const SEED_LISTINGS: Listing[] = [
 
 import { supabase } from '@/integrations/supabase/client';
 
-export type ListingStatus = 'Pending' | 'Verified' | 'Rejected';
-export type QualityRating = 'AAA' | 'AA' | 'A' | 'B+';
 
-export interface Listing {
-    id: string;
-    title: string;
-    category: string;
-    price: string;
-    credits: string;
-    submittedAt: string;
-    status: ListingStatus;
-    description: string;
-    location: string;
-    ownerId?: string | null;
-    image?: string;
-    pricePerUnit?: number;
-    fundingPercentage?: number;
-    verifiedBy?: string;
-    qualityRating?: QualityRating;
-    sdgGoals?: number[];
-    article6?: boolean;
-}
 
 export const listingService = {
     getAll: async (): Promise<Listing[]> => {
@@ -240,6 +219,33 @@ export const listingService = {
 
         if (error) throw error;
         return mapDbListingToClient(data);
+    },
+
+    updateStatus: async (id: string, status: ListingStatus) => {
+        // Map 'Verified' -> true, others -> false
+        const isVerified = status === 'Verified';
+
+        const { error } = await supabase
+            .from('listings')
+            .update({ verified: isVerified })
+            .eq('id', id);
+
+        if (error) {
+            console.error('Error updating status:', error);
+            throw error;
+        }
+    },
+
+    deleteListing: async (id: string) => {
+        const { error } = await supabase
+            .from('listings')
+            .delete()
+            .eq('id', id);
+
+        if (error) {
+            console.error('Error deleting listing:', error);
+            throw error;
+        }
     }
 };
 
