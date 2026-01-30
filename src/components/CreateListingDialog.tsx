@@ -25,11 +25,14 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { ListingStatus, QualityRating } from "@/services/listingService";
 
+import { useAuth } from "@/contexts/AuthContext";
+
 interface CreateListingDialogProps {
     onListingCreated: () => void;
 }
 
 export function CreateListingDialog({ onListingCreated }: CreateListingDialogProps) {
+    const { user } = useAuth();
     const [open, setOpen] = useState(false);
     const [formData, setFormData] = useState({
         title: "",
@@ -51,7 +54,7 @@ export function CreateListingDialog({ onListingCreated }: CreateListingDialogPro
             return;
         }
 
-        const userEmail = localStorage.getItem('user_email') || 'demo@greenbridge.com';
+        const userEmail = user?.email || 'demo@greenbridge.com';
 
         // Parse SDGs
         const sdgArray = formData.sdgGoals.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n));

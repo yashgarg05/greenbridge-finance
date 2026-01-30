@@ -87,17 +87,20 @@ export const GreenInvestment = () => {
     const [currentUserEmail, setCurrentUserEmail] = useState<string | null>(null);
 
     // Initial Load
+    // Initial Load
     useEffect(() => {
-        // Load verified listings
-        const verified = listingService.getVerified();
-        setProjects(verified);
+        const loadListings = async () => {
+            const verified = await listingService.getVerified();
+            setProjects(verified);
+        };
+        loadListings();
 
         // POLL for updates (simulating realtime marketplace)
         const interval = setInterval(() => {
-            setProjects(listingService.getVerified());
-        }, 2000);
+            loadListings();
+        }, 5000); // Increased polling interval to be kinder to API
 
-        // Get Current User
+        // Get Current User (Use UUID from Auth Context ideally, but verifying email for now)
         const email = localStorage.getItem('user_email');
         setCurrentUserEmail(email);
 
@@ -151,8 +154,13 @@ export const GreenInvestment = () => {
         }
     }, [projects, priceRange, selectedType, sortBy]);
 
-    const handleInvest = (project: Listing) => {
-        if (currentUserEmail && project.ownerId === currentUserEmail) {
+    const handleInvest = async (project: Listing) => {
+        if (!currentUserEmail) {
+            toast({ title: "Auth Required", description: "Please login to invest.", variant: "destructive" });
+            return;
+        }
+
+        if (project.ownerId === currentUserEmail) {
             toast({
                 title: "Action Restricted",
                 description: "You cannot invest in your own listing.",
@@ -161,18 +169,41 @@ export const GreenInvestment = () => {
             return;
         }
 
-        toast({
-            title: "Investment Intent",
-            description: `Opening investment portal for ${project.title}...`
-        });
+        try {
+            // For Demo: Assume user buys 10 units
+            const units = 10;
+            const cost = (project.pricePerUnit || 0) * units;
+
+            // Ideally we get userId from auth context, here assuming we have a valid session user ID or using email as proxy if backend allows
+            // Note: createInvestment needs UUID. We need to fetch it or rely on Context.
+            const user = (await import("@/integrations/supabase/client")).supabase.auth.getUser();
+            const userId = (await user).data.user?.id;
+
+            if (!userId) throw new Error("User ID not found");
+
+            await import("@/services/dataService").then(m => m.dataService.createInvestment(userId, project.id, cost, units));
+
+            toast({
+                title: "Investment Successful",
+                description: `You purchased ${units} credits from ${project.title}.`
+            });
+
+            // Refresh
+            refreshListings();
+
+        } catch (e) {
+            console.error(e);
+            toast({ title: "Investment Failed", description: "Could not process transaction.", variant: "destructive" });
+        }
     };
 
-    const refreshListings = () => {
-        setProjects(listingService.getVerified());
+    const refreshListings = async () => {
+        const verified = await listingService.getVerified();
+        setProjects(verified);
     };
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-8 duration-700">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
                 <div>
                     <h2 className="text-2xl font-bold tracking-tight">Green Credit Marketplace</h2>

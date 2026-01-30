@@ -50,45 +50,57 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, []);
 
     const signIn = async (email: string) => {
-        if (isMockMode) {
-            // Mock Login
-            setLoading(true);
-            setTimeout(() => {
+        setLoading(true);
+        try {
+            if (isMockMode) {
+                // Mock Login
+                await new Promise(resolve => setTimeout(resolve, 800));
                 const mockUser = { id: 'mock-user-id', email, user_metadata: { full_name: 'Demo User' } } as any;
                 localStorage.setItem('sb-mock-user', JSON.stringify(mockUser));
                 setUser(mockUser);
                 setSession({ user: mockUser, access_token: 'mock-token' } as Session);
                 toast.success('Logged in (Demo Mode)');
-                setLoading(false);
-            }, 800);
-        } else {
-            // Real Login (Magic Link default or Password if needed)
-            const { error } = await supabase.auth.signInWithOtp({ email });
-            if (error) throw error;
-            toast.success('Check your email for the login link!');
+            } else {
+                // Real Login
+                const { error } = await supabase.auth.signInWithOtp({ email });
+                if (error) throw error;
+                toast.success('Check your email for the login link!');
+            }
+        } catch (error) {
+            console.error(error);
+            toast.error("Login Failed");
+            throw error;
+        } finally {
+            setLoading(false);
         }
     };
 
     const signUp = async (email: string, _password: string, meta?: any) => {
-        if (isMockMode) {
-            // Mock Signup
-            setLoading(true);
-            setTimeout(() => {
+        setLoading(true);
+        try {
+            if (isMockMode) {
+                // Mock Signup
+                await new Promise(resolve => setTimeout(resolve, 800));
                 const mockUser = { id: 'mock-user-id', email, user_metadata: meta } as any;
                 localStorage.setItem('sb-mock-user', JSON.stringify(mockUser));
                 setUser(mockUser);
                 setSession({ user: mockUser, access_token: 'mock-token' } as Session);
                 toast.success('Account created (Demo Mode)');
-                setLoading(false);
-            }, 800);
-        } else {
-            const { error } = await supabase.auth.signUp({
-                email,
-                password: _password,
-                options: { data: meta }
-            });
-            if (error) throw error;
-            toast.success('Check your email to verify your account!');
+            } else {
+                const { error } = await supabase.auth.signUp({
+                    email,
+                    password: _password,
+                    options: { data: meta }
+                });
+                if (error) throw error;
+                toast.success('Check your email to verify your account!');
+            }
+        } catch (error) {
+            console.error(error);
+            toast.error("Signup Failed");
+            throw error;
+        } finally {
+            setLoading(false);
         }
     };
 

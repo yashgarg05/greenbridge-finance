@@ -123,25 +123,90 @@ const SEED_LISTINGS: Listing[] = [
     }
 ];
 
+import { supabase } from '@/integrations/supabase/client';
+
+export type ListingStatus = 'Pending' | 'Verified' | 'Rejected';
+export type QualityRating = 'AAA' | 'AA' | 'A' | 'B+';
+
+export interface Listing {
+    id: string;
+    title: string;
+    category: string;
+    price: string;
+    credits: string;
+    submittedAt: string;
+    status: ListingStatus;
+    description: string;
+    location: string;
+    ownerId?: string | null;
+    image?: string;
+    pricePerUnit?: number;
+    fundingPercentage?: number;
+    verifiedBy?: string;
+    qualityRating?: QualityRating;
+    sdgGoals?: number[];
+    article6?: boolean;
+}
+
 export const listingService = {
-    getAll: (): Listing[] => {
-        const data = localStorage.getItem(STORAGE_KEY);
-        if (!data) {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(SEED_LISTINGS));
-            return SEED_LISTINGS;
+    getAll: async (): Promise<Listing[]> => {
+        const { data, error } = await supabase
+            .from('listings')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            console.error('Error fetching listings:', error);
+            return [];
         }
-        return JSON.parse(data);
+
+        return data.map(mapDbListingToClient);
     },
 
-    getVerified: (): Listing[] => {
-        const all = listingService.getAll();
-        return all.filter(l => l.status === 'Verified');
+    getVerified: async (): Promise<Listing[]> => {
+        const { data, error } = await supabase
+            .from('listings')
+            .select('*')
+            .eq('verified', true)
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            console.error('Error fetching verified listings:', error);
+            return [];
+        }
+
+        return data.map(mapDbListingToClient);
     },
 
-    addListing: (listing: Partial<Listing>) => {
-        const current = listingService.getAll();
+    getByOwner: async (ownerId: string): Promise<Listing[]> => {
+        // Assuming ownerId is the email for now, but usually it's UUID.
+        // We might need to join with profiles if we only have email, or assume owner is UUID.
+        // Let's assume the UI passes the user's UUID or we query by owner_id directly.
+        // However, the current app mock uses Email. We should probably stick to UUID matching if possible.
 
-        // Robust number parsing (handles "15,00,000" and "1500000")
+        // If ownerId is an email, we might have an issue if listings store UUID. 
+        // Let's assume listings store UUID in `owner_id`.
+
+        // For now, I'll try to fetch by matching the auth user separately in the component?
+        // Actually, let's fetch by owner_id if it's a UUID, or filter client side if we must.
+        // But for "My Listings", we usually pass the UUID.
+
+        // Let's assume ownerId passed here is the UUID.
+        const { data, error } = await supabase
+            .from('listings')
+            .select('*')
+            .eq('owner_id', ownerId)
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            console.error('Error fetching user listings:', error);
+            return [];
+        }
+
+        return data.map(mapDbListingToClient);
+    },
+
+    addListing: async (listing: Partial<Listing>, userId: string) => {
         const parseValue = (val: string | number | undefined): number => {
             if (!val) return 0;
             if (typeof val === 'number') return val;
@@ -150,52 +215,54 @@ export const listingService = {
 
         const totalCost = parseValue(listing.price);
         const totalCredits = parseValue(listing.credits);
+        const calculatedPricePerUnit = (totalCost > 0 && totalCredits > 0) ? (totalCost / totalCredits) : 0;
 
-        // Calculate true Price Per Unit (default to 10 if invalid)
-        const calculatedPricePerUnit = (totalCost > 0 && totalCredits > 0)
-            ? (totalCost / totalCredits)
-            : 10;
-
-        const newListing: Listing = {
-            id: Math.random().toString(36).substr(2, 9),
-            title: listing.title || 'Untitled Project',
-            category: listing.category || 'Other',
-            price: listing.price || '0',
-            pricePerUnit: calculatedPricePerUnit,
-            credits: listing.credits || '0',
-            description: listing.description || '',
-            location: listing.location || 'Unknown',
-            status: 'Pending',
-            submittedAt: new Date().toISOString(),
-            ownerId: listing.ownerId || null,
-
-            // Defaults for new listings
-            fundingPercentage: 0,
-            verifiedBy: listing.verifiedBy || 'Pending Audit',
-            qualityRating: listing.qualityRating || 'B+',
-            article6: listing.article6 || false,
-            sdgGoals: listing.sdgGoals || [13],
-            image: listing.image || undefined
+        const dbPayload = {
+            title: listing.title,
+            description: listing.description,
+            location: listing.location,
+            price: totalCost,
+            price_per_unit: calculatedPricePerUnit,
+            available_credits: totalCredits,
+            type: listing.category,
+            verified: false, // Default to pending
+            owner_id: userId,
+            image_url: listing.image,
+            sdgs: listing.sdgGoals?.map(String) || [],
+            vintage: new Date().getFullYear().toString()
         };
 
-        const updated = [newListing, ...current];
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-        return newListing;
-    },
+        const { data, error } = await supabase
+            .from('listings')
+            .insert(dbPayload)
+            .select()
+            .single();
 
-    updateStatus: (id: string, status: ListingStatus) => {
-        const current = listingService.getAll();
-        const updated = current.map(item =>
-            item.id === id ? { ...item, status } : item
-        );
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-        return updated;
-    },
-
-    deleteListing: (id: string) => {
-        const current = listingService.getAll();
-        const updated = current.filter(item => item.id !== id);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-        return updated;
+        if (error) throw error;
+        return mapDbListingToClient(data);
     }
 };
+
+// Helper to map DB columns to Client Interface
+function mapDbListingToClient(dbRecord: any): Listing {
+    return {
+        id: dbRecord.id,
+        title: dbRecord.title,
+        description: dbRecord.description,
+        location: dbRecord.location,
+        price: dbRecord.price?.toString(),
+        pricePerUnit: dbRecord.price_per_unit,
+        credits: dbRecord.available_credits?.toString(),
+        category: dbRecord.type,
+        status: dbRecord.verified ? 'Verified' : 'Pending',
+        submittedAt: dbRecord.created_at,
+        ownerId: dbRecord.owner_id,
+        image: dbRecord.image_url,
+        // Mocking fields not in DB or derived
+        verifiedBy: 'Pending Audit',
+        qualityRating: 'A',
+        fundingPercentage: 0,
+        article6: false,
+        sdgGoals: dbRecord.sdgs?.map(Number) || []
+    };
+}

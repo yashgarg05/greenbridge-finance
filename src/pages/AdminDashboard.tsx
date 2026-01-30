@@ -5,9 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { listingService, Listing } from "@/services/listingService";
-import { Check, X, Trash2, AlertCircle, Search, Filter } from "lucide-react";
+import { Check, X, Trash2, AlertCircle, Search, Filter, Database } from "lucide-react";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
+import { dataService } from "@/services/dataService";
 
 const AdminDashboard = () => {
     const [listings, setListings] = useState<Listing[]>([]);
@@ -117,8 +118,8 @@ const AdminDashboard = () => {
                                     key={tab}
                                     onClick={() => setFilter(tab)}
                                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${filter === tab
-                                            ? 'bg-primary/10 text-primary hover:bg-primary/20'
-                                            : 'text-muted-foreground hover:bg-muted'
+                                        ? 'bg-primary/10 text-primary hover:bg-primary/20'
+                                        : 'text-muted-foreground hover:bg-muted'
                                         }`}
                                 >
                                     {tab}
