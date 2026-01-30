@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Play } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { GreenBridgeLogo } from "@/components/GreenBridgeLogo";
 
 const Login = () => {
     const navigate = useNavigate();
@@ -28,7 +29,7 @@ const Login = () => {
             <div className="w-full max-w-[400px] mx-auto z-10">
                 <div className="flex flex-col items-center mb-8">
                     <Link to="/" className="flex items-center gap-2 mb-4 hover:opacity-80 transition-opacity">
-                        <span className="font-semibold text-lg tracking-tight">GreenBridge</span>
+                        <GreenBridgeLogo size="lg" />
                     </Link>
                     <h1 className="text-2xl font-bold tracking-tight text-center">Welcome back</h1>
                     <p className="text-sm text-muted-foreground text-center mt-2">

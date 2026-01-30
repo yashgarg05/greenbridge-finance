@@ -22,9 +22,9 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
 
-    /* Primary: Sophisticated Emerald - Deep & Professional */
-    --primary: 158 82% 35%;
-    /* Slightly darker for better contract and professionalism */
+    /* Primary: "Infinity Teal" - A deep, rich Emerald-Teal fusion */
+    --primary: 173 80% 30%;
+    /* Deeper, more blue-green than generic grass green */
     --primary-foreground: 0 0% 100%;
 
     --secondary: 210 20% 96%;
@@ -33,15 +33,16 @@
     --muted: 210 40% 96.1%;
     --muted-foreground: 215 16% 47%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222 47% 11.2%;
+    --accent: 173 30% 96%;
+    /* Subtle tint of primary */
+    --accent-foreground: 173 80% 30%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
     --border: 214 32% 91%;
     --input: 214 32% 91%;
-    --ring: 158 82% 40%;
+    --ring: 173 80% 40%;
 
     --radius: 0.75rem;
   }
@@ -55,16 +56,16 @@
     /* #020617 - Very dark blue */
     --foreground: 210 40% 98%;
 
-    --card: 224 71% 7%;
+    --card: 224 71% 6%;
     /* Slightly lighter dark */
     --card-foreground: 210 40% 98%;
 
     --popover: 224 71% 4%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 158 82% 50%;
-    /* Brighter green for dark mode glow */
-    --primary-foreground: 144 100% 5%;
+    --primary: 173 80% 48%;
+    /* Luminous Teal-Emerald */
+    --primary-foreground: 173 100% 98%;
 
     --secondary: 217 33% 17%;
     --secondary-foreground: 210 40% 98%;

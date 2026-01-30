@@ -107,8 +107,6 @@ const Dashboard = () => {
                             <p className="text-muted-foreground flex items-center gap-2">
                                 <Clock className="w-3.5 h-3.5" />
                                 {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
-                                <span className="text-border">|</span>
-                                <span className="text-emerald-600 dark:text-emerald-500 font-medium">Market Active 🟢</span>
                             </p>
                         </div>
                         <div className="flex gap-3">

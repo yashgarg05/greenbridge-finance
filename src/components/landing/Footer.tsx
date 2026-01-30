@@ -1,3 +1,5 @@
+import { GreenBridgeLogo } from "../GreenBridgeLogo";
+
 export const Footer = () => {
     return (
         <footer className="bg-muted/30 border-t border-border/50 pt-16 pb-8">
@@ -5,8 +7,7 @@ export const Footer = () => {
                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 mb-16">
                     <div className="col-span-2">
                         <div className="flex items-center gap-2 mb-4">
-                            <div className="h-6 w-6 bg-primary rounded-md" />
-                            <span className="font-semibold text-lg tracking-tight">GreenBridge</span>
+                            <GreenBridgeLogo size="md" />
                         </div>
                         <p className="text-sm text-muted-foreground max-w-xs leading-relaxed">
                             Empowering global trade with automated carbon compliance and financial intelligence.

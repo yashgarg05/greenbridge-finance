@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
+import { GreenBridgeLogo } from "@/components/GreenBridgeLogo";
 
 const Signup = () => {
     const navigate = useNavigate();
@@ -139,7 +140,7 @@ const Signup = () => {
             <div className="w-full max-w-[450px] mx-auto z-10">
                 <div className="flex flex-col items-center mb-8">
                     <Link to="/" className="flex items-center gap-2 mb-4 hover:opacity-80 transition-opacity">
-                        <span className="font-semibold text-lg tracking-tight">GreenBridge</span>
+                        <GreenBridgeLogo size="lg" />
                     </Link>
                     <h1 className="text-2xl font-bold tracking-tight text-center">Create account</h1>
                     <p className="text-sm text-muted-foreground text-center mt-2">
