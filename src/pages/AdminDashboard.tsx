@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { AppSidebar } from "@/components/AppSidebar";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -59,7 +59,7 @@ const AdminDashboard = () => {
 
     return (
         <div className="flex bg-background min-h-screen font-sans">
-            <AppSidebar activeTab="admin" onTabChange={() => { }} />
+            {/* Sidebar removed per user request */}
 
             <main className="flex-1 p-6 overflow-hidden flex flex-col">
                 <div className="flex justify-between items-end mb-8 animate-in fade-in slide-in-from-top-4 duration-500">
