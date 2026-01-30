@@ -15,6 +15,11 @@ const AdminDashboard = () => {
     const [filter, setFilter] = useState<'All' | 'Pending' | 'Verified'>('All');
     const [search, setSearch] = useState('');
 
+
+
+    // Auth check removed per user request for easier demo access.
+
+
     useEffect(() => {
         loadListings();
         // Poll for updates (simulate real-time)

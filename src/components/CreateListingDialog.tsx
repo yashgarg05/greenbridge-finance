@@ -48,51 +48,63 @@ export function CreateListingDialog({ onListingCreated }: CreateListingDialogPro
         image: ""
     });
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         if (!formData.title || !formData.price || !formData.category) {
             toast.error("Please fill in all required fields.");
             return;
         }
 
-        const userEmail = user?.email || 'demo@greenbridge.com';
+        if (!user) {
+            toast.error("Authentication Required", { description: "You must be logged in to submit a project." });
+            return;
+        }
+
+        const ownerId = user.id; // Must be UUID
 
         // Parse SDGs
         const sdgArray = formData.sdgGoals.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n));
 
-        listingService.addListing({
-            title: formData.title,
-            category: formData.category,
-            price: formData.price,
-            credits: formData.credits || 'Pending Calculation',
-            description: formData.description,
-            location: formData.location,
-            verifiedBy: formData.verifiedBy,
-            qualityRating: formData.qualityRating,
-            sdgGoals: sdgArray.length > 0 ? sdgArray : [13],
-            article6: formData.article6,
-            image: formData.image || undefined, // undefined triggers fallback in GreenInvestment if implemented, or we can set specific fallback here using service logic if needed, but service has default.
-            ownerId: userEmail
-        });
+        try {
+            await listingService.addListing({
+                title: formData.title,
+                category: formData.category,
+                price: formData.price,
+                credits: formData.credits || 'Pending Calculation',
+                description: formData.description,
+                location: formData.location,
+                verifiedBy: formData.verifiedBy,
+                qualityRating: formData.qualityRating,
+                sdgGoals: sdgArray.length > 0 ? sdgArray : [13],
+                article6: formData.article6,
+                image: formData.image || undefined,
+                ownerId: ownerId
+            }, ownerId);
 
-        toast.success("Listing Submitted", {
-            description: "Your project has been sent to the Admin queue for approval."
-        });
+            toast.success("Listing Submitted", {
+                description: "Your project has been sent to the Admin queue for approval."
+            });
 
-        setOpen(false);
-        setFormData({
-            title: "",
-            category: "",
-            price: "",
-            credits: "",
-            description: "",
-            location: "",
-            verifiedBy: "Pending Audit",
-            qualityRating: "B+",
-            sdgGoals: "13",
-            article6: false,
-            image: ""
-        });
-        onListingCreated();
+            setOpen(false);
+            setFormData({
+                title: "",
+                category: "",
+                price: "",
+                credits: "",
+                description: "",
+                location: "",
+                verifiedBy: "Pending Audit",
+                qualityRating: "B+",
+                sdgGoals: "13",
+                article6: false,
+                image: ""
+            });
+            onListingCreated();
+
+        } catch (error) {
+            console.error("Submission failed:", error);
+            toast.error("Submission Failed", { description: "Could not save listing to database." });
+        }
+
     };
 
     return (

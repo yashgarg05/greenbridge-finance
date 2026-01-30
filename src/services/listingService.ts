@@ -225,26 +225,36 @@ export const listingService = {
         // Map 'Verified' -> true, others -> false
         const isVerified = status === 'Verified';
 
-        const { error } = await supabase
+        const { error, count } = await supabase
             .from('listings')
             .update({ verified: isVerified })
-            .eq('id', id);
+            .eq('id', id)
+            .select('*', { count: 'exact' });
 
         if (error) {
             console.error('Error updating status:', error);
             throw error;
         }
+
+        if (count === 0) {
+            throw new Error("Permission Denied: Could not update listing. (Check RLS Policies)");
+        }
     },
 
     deleteListing: async (id: string) => {
-        const { error } = await supabase
+        const { error, count } = await supabase
             .from('listings')
             .delete()
-            .eq('id', id);
+            .eq('id', id)
+            .select('*', { count: 'exact' });
 
         if (error) {
             console.error('Error deleting listing:', error);
             throw error;
+        }
+
+        if (count === 0) {
+            throw new Error("Permission Denied: Could not delete listing. (Check RLS Policies)");
         }
     }
 };
