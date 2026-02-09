@@ -53,8 +53,13 @@ const Signup = () => {
 
     const handleSignup = async () => {
         // Validation
-        if (!formData.name || !formData.email || !formData.role) {
+        if (!formData.name || !formData.email || !formData.role || !formData.password || !formData.confirmPassword) {
             toast.error("Please fill in all required fields.");
+            return;
+        }
+
+        if (formData.password !== formData.confirmPassword) {
+            toast.error("Passwords do not match");
             return;
         }
 
@@ -73,6 +78,7 @@ const Signup = () => {
                 toast.error("Passwords do not match");
                 return;
             }
+            // Attempt Signup
             await signUp(formData.email, formData.password, {
                 full_name: formData.name,
                 mobile: formData.mobile,
@@ -245,6 +251,7 @@ const Signup = () => {
                                 </Select>
                             </div>
                         )}
+
 
                         <Button className="w-full" onClick={handleSignup} disabled={isSubmitting || (!!companyInfo && !companyInfo.allowed)}>
                             {isSubmitting ? 'Processing...' : 'Create Account'}
