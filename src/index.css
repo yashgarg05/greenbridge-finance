@@ -22,12 +22,12 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
 
-    /* Primary: Sophisticated Emerald */
-    --primary: 158 82% 40%;
-    /* Slightly darker for contrast on white */
+    /* Primary: Sophisticated Emerald - Deep & Professional */
+    --primary: 158 82% 35%;
+    /* Slightly darker for better contract and professionalism */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96.1%;
+    --secondary: 210 20% 96%;
     --secondary-foreground: 222 47% 11.2%;
 
     --muted: 210 40% 96.1%;

@@ -17,16 +17,34 @@ import { AppSidebar } from "@/components/AppSidebar";
 import { CreateListingDialog } from "@/components/CreateListingDialog";
 import { listingService, Listing } from "@/services/listingService";
 
+import { useAuth } from "@/contexts/AuthContext";
+
 const MyListings = () => {
+    const { user } = useAuth();
     const [listings, setListings] = useState<Listing[]>([]);
     const navigate = useNavigate();
 
     useEffect(() => {
-        setListings(listingService.getAll());
-    }, []);
+        const fetchListings = async () => {
+            if (user?.email) {
+                // If using RLS with UUID, passing email might return empty if column is owner_id (uuid)
+                // But let's fix the crash first. 
+                const data = await listingService.getByOwner(user.id || user.email);
+                // We should prefer user.id if the service uses owner_id UUID. 
+                // listingService.getByOwner expects string.
+                setListings(data);
+            } else {
+                setListings([]);
+            }
+        };
+        fetchListings();
+    }, [user]);
 
-    const refreshListings = () => {
-        setListings(listingService.getAll());
+    const refreshListings = async () => {
+        if (user?.email) {
+            const data = await listingService.getByOwner(user.id || user.email);
+            setListings(data);
+        }
     };
 
     return (
@@ -37,7 +55,7 @@ const MyListings = () => {
             }} />
 
             <main className="flex-1 p-8 overflow-y-auto">
-                <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-700">
                     <div className="flex items-center justify-between">
                         <div>
                             <Link to="/dashboard" className="text-muted-foreground hover:text-foreground text-sm flex items-center gap-1 mb-2">

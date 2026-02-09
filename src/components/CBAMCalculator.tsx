@@ -8,6 +8,8 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from "@/components/ui/separator";
 
+import { AnimatedCounter } from '@/components/ui/AnimatedCounter';
+
 // --- Constants ---
 const CARBON_PRICE_EUR = 85.50;
 const EXCHANGE_RATE_INR = 90.0; // 1 EUR = 90 INR
@@ -27,46 +29,6 @@ const ORIGINS = [
   { id: 'us', name: 'USA', risk: 0.9 }, // Efficiency bonus
   { id: 'eu', name: 'Europe', risk: 0.8 },
 ];
-
-// --- Helper: Animated Counter ---
-function AnimatedCounter({ value, prefix = '', suffix = '' }: { value: number, prefix?: string, suffix?: string }) {
-  const [displayValue, setDisplayValue] = useState(value);
-
-  useEffect(() => {
-    let start = displayValue;
-    const end = value;
-    // Don't animate small changes (optional, but keeps it snappy)
-    if (start === end) return;
-
-    const duration = 600; // ms
-    const startTime = performance.now();
-
-    const animate = (currentTime: number) => {
-      const elapsed = currentTime - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-
-      // Ease out quartic
-      const ease = 1 - Math.pow(1 - progress, 4);
-
-      const current = start + (end - start) * ease;
-      setDisplayValue(current);
-
-      if (progress < 1) {
-        requestAnimationFrame(animate);
-      }
-    };
-
-    requestAnimationFrame(animate);
-  }, [value]);
-
-  return (
-    <span>
-      {prefix}
-      {displayValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}
-      {suffix}
-    </span>
-  );
-}
 
 export function CBAMCalculator() {
   // --- State ---
@@ -105,7 +67,7 @@ export function CBAMCalculator() {
   }, [commodity, origin, quantity]);
 
   return (
-    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-8 duration-700">
       {/* Header */}
       <div>
         <h2 className="text-2xl font-bold tracking-tight flex items-center gap-2">
