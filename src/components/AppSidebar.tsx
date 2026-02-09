@@ -1,7 +1,8 @@
-import { Home, Calculator, Sprout, Settings, ListChecks } from 'lucide-react';
+import { Home, Calculator, Sprout, Settings, ListChecks, ShieldCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { ThemeToggle } from './ThemeToggle';
 
 interface AppSidebarProps {
   activeTab: string;
@@ -12,6 +13,7 @@ const navItems = [
   { id: 'overview', icon: Home, label: 'Home' },
   { id: 'invest', icon: Sprout, label: 'Invest' },
   { id: 'listings', icon: ListChecks, label: 'My Listings', path: '/my-listings' },
+  { id: 'compliance', icon: ShieldCheck, label: 'Compliance' },
   { id: 'calculator', icon: Calculator, label: 'Calculator' },
   { id: 'settings', icon: Settings, label: 'Settings' },
 ];
@@ -72,6 +74,10 @@ export function AppSidebar({ activeTab, onTabChange }: AppSidebarProps) {
           );
         })}
       </nav>
+      {/* Theme Toggle */}
+      <div className="mt-auto">
+        <ThemeToggle />
+      </div>
     </aside>
   );
 }

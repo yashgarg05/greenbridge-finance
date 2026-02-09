@@ -14,28 +14,20 @@ import {
 } from "@/components/ui/table";
 import { AppSidebar } from "@/components/AppSidebar";
 
-interface Listing {
-    id: string;
-    title: string;
-    category: string;
-    price: string;
-    credits: string;
-    submittedAt: string;
-    status: 'Pending' | 'Verified' | 'Rejected';
-}
+import { CreateListingDialog } from "@/components/CreateListingDialog";
+import { listingService, Listing } from "@/services/listingService";
 
 const MyListings = () => {
     const [listings, setListings] = useState<Listing[]>([]);
     const navigate = useNavigate();
 
     useEffect(() => {
-        const savedListings = localStorage.getItem('user_listings');
-        if (savedListings) {
-            setListings(JSON.parse(savedListings));
-        }
+        setListings(listingService.getAll());
     }, []);
 
-    const [activeTab, setActiveTab] = useState('listings'); // Dummy state for sidebar
+    const refreshListings = () => {
+        setListings(listingService.getAll());
+    };
 
     return (
         <div className="flex bg-background min-h-screen">
@@ -45,33 +37,34 @@ const MyListings = () => {
             }} />
 
             <main className="flex-1 p-8 overflow-y-auto">
-                <div className="max-w-5xl mx-auto space-y-8">
+                <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
                     <div className="flex items-center justify-between">
                         <div>
                             <Link to="/dashboard" className="text-muted-foreground hover:text-foreground text-sm flex items-center gap-1 mb-2">
                                 <ArrowLeft className="w-4 h-4" /> Back to Dashboard
                             </Link>
-                            <h1 className="text-3xl font-bold tracking-tight">My Listings</h1>
+                            <h1 className="text-3xl font-bold tracking-tight glow-text text-foreground">My Listings</h1>
                             <p className="text-muted-foreground mt-1">
                                 Track the status of your submitted projects.
                             </p>
                         </div>
-                        <Button onClick={() => navigate('/dashboard', { state: { activeTab: 'invest', openListingModal: true } })} className="gap-2">
-                            <Plus className="w-4 h-4" /> Submit New Project
-                        </Button>
+                        <CreateListingDialog onListingCreated={refreshListings} />
                     </div>
 
-                    <Card>
+                    <Card className="glass-panel">
                         <CardHeader>
                             <CardTitle>Submitted Projects</CardTitle>
                         </CardHeader>
                         <CardContent>
+                            {listings.filter(l => l.status !== 'Rejected').length === 0 && listings.length > 0 ? (
+                                // No active listings (all rejected?? or simplify check)
+                                // Actually let's just show all
+                                <></>
+                            ) : null}
+
                             {listings.length === 0 ? (
                                 <div className="text-center py-12 text-muted-foreground">
                                     <p>You haven't listed any projects yet.</p>
-                                    <Button variant="link" onClick={() => navigate('/dashboard')} className="mt-2">
-                                        Go to Marketplace to list a project
-                                    </Button>
                                 </div>
                             ) : (
                                 <Table>
@@ -86,12 +79,12 @@ const MyListings = () => {
                                     </TableHeader>
                                     <TableBody>
                                         {listings.map((listing) => (
-                                            <TableRow key={listing.id}>
+                                            <TableRow key={listing.id} className="hover:bg-muted/30 transition-colors">
                                                 <TableCell className="font-medium">{listing.title}</TableCell>
                                                 <TableCell>{listing.category}</TableCell>
                                                 <TableCell>
                                                     <div className="flex flex-col text-xs">
-                                                        <span>€{listing.price}</span>
+                                                        <span>₹{listing.price}</span>
                                                         <span className="text-muted-foreground">{listing.credits} Credits</span>
                                                     </div>
                                                 </TableCell>
@@ -100,13 +93,13 @@ const MyListings = () => {
                                                 </TableCell>
                                                 <TableCell>
                                                     {listing.status === 'Pending' && (
-                                                        <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100 border-yellow-200">
-                                                            Pending Verification
+                                                        <Badge variant="secondary" className="bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 border-amber-200 dark:border-amber-800">
+                                                            Pending Review
                                                         </Badge>
                                                     )}
                                                     {listing.status === 'Verified' && (
-                                                        <Badge variant="secondary" className="bg-green-100 text-green-800 hover:bg-green-100 border-green-200">
-                                                            Verified
+                                                        <Badge variant="secondary" className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800">
+                                                            Live
                                                         </Badge>
                                                     )}
                                                     {listing.status === 'Rejected' && (

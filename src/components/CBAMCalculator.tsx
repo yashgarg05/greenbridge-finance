@@ -1,252 +1,222 @@
-import { useState } from 'react';
-import { Calculator, TrendingUp, AlertTriangle, Info } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Calculator, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
-  calculateCBAMLiability,
-  formatCurrency,
-  formatNumber,
-  generateRecommendations,
-  CURRENT_ETS_PRICE,
-  PHASE_IN_MULTIPLIER_2026,
-  EMISSION_FACTORS,
-  COUNTRY_FACTORS,
-  type CommodityType,
-  type CBAMResult,
-} from '@/lib/cbam-calculator';
+import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Separator } from "@/components/ui/separator";
 
-const commodities: { value: CommodityType; label: string }[] = [
-  { value: 'steel', label: 'Steel' },
-  { value: 'aluminum', label: 'Aluminum' },
-  { value: 'cement', label: 'Cement' },
-  { value: 'fertilizer', label: 'Fertilizer' },
+// --- Constants ---
+const CARBON_PRICE_EUR = 85.50;
+const EXCHANGE_RATE_INR = 90.0; // 1 EUR = 90 INR
+
+const COMMODITIES = [
+  { id: 'steel', name: 'Steel', factor: 1.9 },
+  { id: 'cement', name: 'Cement', factor: 0.9 },
+  { id: 'aluminum', name: 'Aluminum', factor: 16.5 }, // High intensity
+  { id: 'fertilizer', name: 'Fertilizer', factor: 2.6 },
+  { id: 'hydrogen', name: 'Hydrogen', factor: 8.9 }
 ];
 
-const countries = Object.keys(COUNTRY_FACTORS);
+const ORIGINS = [
+  { id: 'cn', name: 'China', risk: 1.4 }, // High coal grid
+  { id: 'in', name: 'India', risk: 1.3 },
+  { id: 'tr', name: 'Turkey', risk: 1.1 },
+  { id: 'us', name: 'USA', risk: 0.9 }, // Efficiency bonus
+  { id: 'eu', name: 'Europe', risk: 0.8 },
+];
 
-export function CBAMCalculator() {
-  const [commodityType, setCommodityType] = useState<CommodityType>('steel');
-  const [quantity, setQuantity] = useState<string>('1000');
-  const [country, setCountry] = useState<string>('China');
-  const [result, setResult] = useState<CBAMResult | null>(null);
+// --- Helper: Animated Counter ---
+function AnimatedCounter({ value, prefix = '', suffix = '' }: { value: number, prefix?: string, suffix?: string }) {
+  const [displayValue, setDisplayValue] = useState(value);
 
-  const handleCalculate = () => {
-    const input = {
-      commodityType,
-      importQuantity: parseFloat(quantity) || 0,
-      countryOfOrigin: country,
+  useEffect(() => {
+    let start = displayValue;
+    const end = value;
+    // Don't animate small changes (optional, but keeps it snappy)
+    if (start === end) return;
+
+    const duration = 600; // ms
+    const startTime = performance.now();
+
+    const animate = (currentTime: number) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+
+      // Ease out quartic
+      const ease = 1 - Math.pow(1 - progress, 4);
+
+      const current = start + (end - start) * ease;
+      setDisplayValue(current);
+
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      }
     };
-    const calculation = calculateCBAMLiability(input);
-    setResult(calculation);
-  };
+
+    requestAnimationFrame(animate);
+  }, [value]);
 
   return (
-    <div className="space-y-6">
+    <span>
+      {prefix}
+      {displayValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+      {suffix}
+    </span>
+  );
+}
+
+export function CBAMCalculator() {
+  // --- State ---
+  const [commodity, setCommodity] = useState(COMMODITIES[0].id);
+  const [origin, setOrigin] = useState(ORIGINS[0].id);
+  const [quantity, setQuantity] = useState<string>('1000');
+
+  // --- Computed ---
+  const [result, setResult] = useState({
+    emissions: 0,
+    liabilityEUR: 0,
+    liabilityINR: 0,
+    freeAllowance: 0
+  });
+
+  useEffect(() => {
+    const selectedComm = COMMODITIES.find(c => c.id === commodity)!;
+    const selectedOrigin = ORIGINS.find(o => o.id === origin)!;
+    const qty = parseFloat(quantity) || 0;
+
+    // Basic Math: Qty * Factor * OriginRisk
+    const rawEmissions = qty * selectedComm.factor * selectedOrigin.risk;
+
+    // Free Allowance (Simplification: 20% free allocation phase-out)
+    const freeAllowance = rawEmissions * 0.20;
+    const taxableEmissions = Math.max(0, rawEmissions - freeAllowance);
+
+    const liabilityEUR = taxableEmissions * CARBON_PRICE_EUR;
+
+    setResult({
+      emissions: rawEmissions,
+      freeAllowance,
+      liabilityEUR,
+      liabilityINR: liabilityEUR * EXCHANGE_RATE_INR
+    });
+  }, [commodity, origin, quantity]);
+
+  return (
+    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-xl font-semibold flex items-center gap-2">
-            <Calculator className="h-5 w-5 text-primary" />
-            CBAM Compliance Calculator
-          </h2>
-          <p className="text-sm text-muted-foreground mt-1">
-            Estimate your Carbon Border Adjustment Mechanism liability
-          </p>
-        </div>
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <Info className="h-4 w-4" />
-          <span>EU ETS Price: {formatCurrency(CURRENT_ETS_PRICE)}/tCO₂</span>
-        </div>
+      <div>
+        <h2 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+          <Calculator className="w-6 h-6 text-primary" />
+          CBAM Liability Calculator
+        </h2>
+        <p className="text-muted-foreground">Estimate carbon taxes for EU imports under the Carbon Border Adjustment Mechanism.</p>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        {/* Input Form */}
-        <Card className="data-card">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-base">Import Details</CardTitle>
+      <div className="grid gap-8 lg:grid-cols-2">
+
+        {/* INPUT SECTION */}
+        <Card className="glass-panel border-border/50">
+          <CardHeader>
+            <CardTitle className="text-lg">Shipment Details</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="commodity" className="metric-label">
-                Commodity Type
-              </Label>
-              <Select value={commodityType} onValueChange={(v) => setCommodityType(v as CommodityType)}>
-                <SelectTrigger id="commodity" className="bg-background">
+          <CardContent className="space-y-6">
+            <div className="space-y-3">
+              <Label>Commodity Type</Label>
+              <Select value={commodity} onValueChange={setCommodity}>
+                <SelectTrigger className="h-11">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {commodities.map((c) => (
-                    <SelectItem key={c.value} value={c.value}>
-                      {c.label} (EF: {EMISSION_FACTORS[c.value]} tCO₂/t)
+                  {COMMODITIES.map(c => (
+                    <SelectItem key={c.id} value={c.id}>
+                      <span className="font-medium">{c.name}</span>
+                      <span className="text-xs text-muted-foreground ml-2">
+                        (Avg. {c.factor} tCO2/t)
+                      </span>
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="quantity" className="metric-label">
-                Import Quantity (Tonnes)
-              </Label>
+            <div className="space-y-3">
+              <Label>Country of Origin</Label>
+              <Select value={origin} onValueChange={setOrigin}>
+                <SelectTrigger className="h-11">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {ORIGINS.map(o => (
+                    <SelectItem key={o.id} value={o.id}>
+                      {o.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+                <AlertCircle className="w-3.5 h-3.5" />
+                Origin determines grid-intensity multipliers.
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              <Label>Quantity (Tonnes)</Label>
               <Input
-                id="quantity"
                 type="number"
                 value={quantity}
                 onChange={(e) => setQuantity(e.target.value)}
-                placeholder="Enter quantity"
-                className="bg-background font-mono"
+                className="h-11 font-mono text-lg"
+                placeholder="e.g. 1000"
               />
             </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="country" className="metric-label">
-                Country of Origin
-              </Label>
-              <Select value={country} onValueChange={setCountry}>
-                <SelectTrigger id="country" className="bg-background">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {countries.map((c) => (
-                    <SelectItem key={c} value={c}>
-                      {c}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <Button onClick={handleCalculate} className="w-full mt-4" size="lg">
-              <Calculator className="mr-2 h-4 w-4" />
-              Calculate Liability
-            </Button>
           </CardContent>
         </Card>
 
-        {/* Results */}
-        <div className="space-y-4">
-          {result ? (
-            <>
-              {/* Main Liability Card */}
-              <Card className="data-card glow-primary border-primary/30">
-                <CardContent className="pt-6">
-                  <div className="text-center">
-                    <p className="metric-label mb-2">Estimated CBAM Liability (2026)</p>
-                    <p className="text-4xl font-bold financial-value">
-                      {formatCurrency(result.estimatedLiability)}
-                    </p>
-                    <p className="text-sm text-muted-foreground mt-2">
-                      {(PHASE_IN_MULTIPLIER_2026 * 100).toFixed(1)}% phase-in rate applied
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
+        {/* OUTPUT / INVOICE SECTION */}
+        <Card className="border-border/50 bg-muted/20 relative overflow-hidden flex flex-col justify-center">
+          <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-blue-500/5" />
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="col-span-2">
-                  <p className="text-sm font-semibold mb-3 flex items-center gap-2">
-                    <TrendingUp className="w-4 h-4 text-green-500" />
-                    Optimization Opportunities
-                  </p>
-                  <div className="grid gap-3">
-                    {generateRecommendations({ commodityType, importQuantity: parseFloat(quantity) || 0, countryOfOrigin: country }, result).map((rec, i) => (
-                      <Card key={i} className="border-l-4 border-l-green-500 bg-muted/20">
-                        <CardContent className="p-4">
-                          <div className="flex justify-between items-start mb-1">
-                            <div className="space-y-1">
-                              <p className="font-semibold text-sm">{rec.title}</p>
-                              {rec.potentialCredits && (rec.potentialCredits > 0) && (
-                                <div className="flex items-center gap-1.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-0.5 w-fit rounded text-[10px] font-bold uppercase tracking-wider border border-blue-200 dark:border-blue-800">
-                                  <span>Earn {rec.potentialCredits} Verified Credits</span>
-                                </div>
-                              )}
-                            </div>
-                            {rec.potentialSavingsEUR && (
-                              <span className="text-green-600 font-bold text-xs bg-green-100 px-2 py-1 rounded-full shrink-0">
-                                Save ~{formatCurrency(rec.potentialSavingsEUR)}
-                              </span>
-                            )}
-                          </div>
-                          <p className="text-xs text-muted-foreground mt-2">{rec.description}</p>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                </div>
+          <CardContent className="p-8 relative space-y-8">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-1">Estimated Tax Liability</p>
+              <div className="flex items-baseline gap-2">
+                <h3 className="text-5xl font-bold tracking-tighter text-foreground tabular-nums">
+                  <AnimatedCounter value={result.liabilityEUR} prefix="€" />
+                </h3>
+                <span className="text-lg text-muted-foreground font-medium">EUR</span>
               </div>
+              <p className="text-emerald-600 dark:text-emerald-400 font-mono font-medium mt-2 tabular-nums">
+                ≈ <AnimatedCounter value={result.liabilityINR} prefix="₹" /> INR
+              </p>
+            </div>
 
-              {/* Breakdown Cards */}
-              <div className="grid grid-cols-2 gap-4">
-                <Card className="data-card">
-                  <CardContent className="pt-4">
-                    <p className="metric-label">Total Emissions</p>
-                    <p className="text-2xl font-semibold font-mono mt-1">
-                      {formatNumber(result.totalEmissions)} <span className="text-sm text-muted-foreground">tCO₂</span>
-                    </p>
-                  </CardContent>
-                </Card>
+            <Separator className="bg-border/50" />
 
-                <Card className="data-card">
-                  <CardContent className="pt-4">
-                    <p className="metric-label">Gross Liability</p>
-                    <p className="text-2xl font-semibold font-mono mt-1">
-                      {formatCurrency(result.grossLiability)}
-                    </p>
-                  </CardContent>
-                </Card>
-
-                <Card className="data-card">
-                  <CardContent className="pt-4">
-                    <p className="metric-label">Emission Factor</p>
-                    <p className="text-2xl font-semibold font-mono mt-1">
-                      {result.emissionFactor} <span className="text-sm text-muted-foreground">tCO₂/t</span>
-                    </p>
-                  </CardContent>
-                </Card>
-
-                <Card className="data-card">
-                  <CardContent className="pt-4">
-                    <p className="metric-label">EU ETS Price</p>
-                    <p className="text-2xl font-semibold font-mono mt-1">
-                      €{result.etsPrice}
-                    </p>
-                  </CardContent>
-                </Card>
+            <div className="space-y-4">
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-muted-foreground">Total Emissions</span>
+                <span className="font-mono font-medium tabular-nums">
+                  <AnimatedCounter value={result.emissions} suffix=" tCO2e" />
+                </span>
               </div>
-
-              {/* Projection Alert */}
-              <Card className="data-card border-warning/30 bg-warning/5">
-                <CardContent className="pt-4 flex items-start gap-3">
-                  <AlertTriangle className="h-5 w-5 text-warning flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-sm font-medium text-warning">Phase-in Projection</p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      By 2034 (100% phase-in), your liability would be{' '}
-                      <span className="font-mono text-foreground">{formatCurrency(result.grossLiability)}</span>
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            </>
-          ) : (
-            <Card className="data-card h-full flex items-center justify-center min-h-[300px]">
-              <div className="text-center text-muted-foreground">
-                <TrendingUp className="h-12 w-12 mx-auto mb-4 opacity-30" />
-                <p>Enter import details and calculate</p>
-                <p className="text-sm mt-1">to see your CBAM liability estimate</p>
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-muted-foreground">Free Allowance Credits</span>
+                <span className="font-mono font-medium text-emerald-600 dark:text-emerald-400 tabular-nums">
+                  -<AnimatedCounter value={result.freeAllowance} suffix=" tCO2e" />
+                </span>
               </div>
-            </Card>
-          )}
-        </div>
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-muted-foreground">Carbon Price (EU ETS)</span>
+                <span className="font-mono font-medium">€{CARBON_PRICE_EUR}/tonne</span>
+              </div>
+            </div>
+
+          </CardContent>
+        </Card>
+
       </div>
     </div>
   );

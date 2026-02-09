@@ -4,20 +4,27 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Github } from "lucide-react";
 import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Signup = () => {
     const navigate = useNavigate();
+    const { signUp, loading } = useAuth();
     const [formData, setFormData] = useState({
         name: "",
         email: "",
         mobile: ""
     });
 
-    const handleSignup = () => {
-        localStorage.setItem('user_name', formData.name || 'Yash Garg');
-        localStorage.setItem('user_email', formData.email || 'yash@greenbridge.finance');
-        if (formData.mobile) localStorage.setItem('user_mobile', formData.mobile);
-        navigate('/dashboard');
+    const handleSignup = async () => {
+        try {
+            await signUp(formData.email, 'password123', {
+                full_name: formData.name,
+                mobile: formData.mobile
+            });
+            navigate('/dashboard');
+        } catch (error) {
+            console.error(error);
+        }
     };
 
     return (
